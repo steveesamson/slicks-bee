@@ -1,0 +1,46 @@
+{
+  "name": "slicks-bee",
+  "version": "1.0.0",
+  "description": "Slicks Back-End-Engine, slicks-bee, is a robust and high traffic NodeJS web framework developped on Expressjs 4+.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steveesamson/slicks-bee.git"
+  },
+  "keywords": [
+    "slicks-bee",
+    "slicks",
+    "nodejs",
+    "web",
+    "framework",
+    "javascript",
+    "back-end-engine",
+    "back",
+    "end",
+    "engine."
+  ],
+  "author": "Steve Samson <stevee.samson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/steveesamson/slicks-bee/issues"
+  },
+  "homepage": "https://github.com/steveesamson/slicks-bee#readme",
+  "dependencies": {
+    "busboy": "^0.2.13",
+    "errorhandler": "^1.4.3",
+    "express": "^4.14.0",
+    "gm": "^1.23.0",
+    "jsonwebtoken": "^7.1.9",
+    "method-override": "^2.3.6",
+    "morgan": "^1.7.0",
+    "serve-favicon": "^2.3.0",
+    "slicks-mysql": "^1.2.0",
+    "socketio-jwt": "^4.5.0",
+    "strbuilder": "^1.2.0",
+    "stud": "^1.0.6",
+    "underscore": "^1.8.3"
+  }
+}
