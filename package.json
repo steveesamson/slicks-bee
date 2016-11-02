@@ -37,7 +37,6 @@
     "method-override": "^2.3.6",
     "morgan": "^1.7.0",
     "serve-favicon": "^2.3.0",
-    "slicks-mysql": "^1.2.0",
     "socketio-jwt": "^4.5.0",
     "strbuilder": "^1.2.0",
     "stud": "^1.0.6",
