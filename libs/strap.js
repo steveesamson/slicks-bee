@@ -57,12 +57,13 @@ module.exports = function (head, resource) {
                 policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
 //            console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
             head[normalized.method](normalized.path, policy, controller[handler_name]);
-            console.log(normalized);
+            // console.log(normalized);
         }
 
     }
 //    global['slickIO'] = head.io;
 
+    
     global['SlicksDecoder'] = {
         writeStreamTo: function (req, options, cb) {
 

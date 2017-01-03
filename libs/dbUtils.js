@@ -3,6 +3,7 @@
  */
 module.exports = function (databases, resource) {
 
+
     var du = {
 
         load: function (cfg, cb, oc) {
@@ -43,7 +44,7 @@ module.exports = function (databases, resource) {
             if (next) {
                 du.load(next, du.handler, done);
             } else {
-                console.log('Connected to ' + utils.keys(databases).length + ' database(s).');
+                // console.log('Connected to ' + utils.keys(databases).length + ' database(s).');
                 (done && done());
             }
 

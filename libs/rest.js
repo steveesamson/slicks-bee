@@ -78,8 +78,6 @@ module.exports = function (modelName) {
         update: function (req, res) {
 
             var arg = req.parameters;
-            console.log('HERE: ');
-            console.log(arg);
 
             global[modelName].update(arg, function (err, result) {
                 if (err) {
