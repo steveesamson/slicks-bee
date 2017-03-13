@@ -80,6 +80,8 @@ module.exports = function (resource) {
                     restRoutes['post /' + key.toLowerCase() + '/streampix'] = 'streampix';
                     restRoutes['post /' + key.toLowerCase() + '/uploadpix'] = 'uploadpix';
                     restRoutes['post /' + key.toLowerCase() + '/xexcel'] = 'xexcel';
+                    restRoutes['post /' + key.toLowerCase() + '/unlink'] = 'unlink';
+                    restRoutes['post /' + key.toLowerCase() + '/spinx'] = 'spinx';
                 }
                 utils.extend(route, restRoutes, actionRoutes);
 

@@ -20,7 +20,7 @@ module.exports = function (modelName) {
             global[modelName].find(req.parameters, function (err, rows) {
 
                 if (err) {
-                    res.status(400).json({error: err.message});
+                    res.status(200).json({error: err.message});
                 } else {
                     if(rows){
                         res.status(200).json(rows);
@@ -36,7 +36,7 @@ module.exports = function (modelName) {
 
             global[modelName].create(load, function (err, result) {
                 if (err) {
-                    res.status(400).json({error: err.message});
+                    res.status(200).json({error: err.message});
 
                 }
                 else {
@@ -44,7 +44,7 @@ module.exports = function (modelName) {
                     global[modelName].find(result, function (err, row) {
 
                         if (err) {
-                            res.status(400).json({error: err.message});
+                            res.status(200).json({error: err.message});
                         } else {
 
                             global[modelName].publishCreate(req, row);
@@ -61,7 +61,7 @@ module.exports = function (modelName) {
             var arg = req.parameters;
             global[modelName].destroy(arg, function (err, result) {
                 if (err) {
-                    res.status(400).json({error: err.message});
+                    res.status(200).json({error: err.message});
 
                 } else {
 
@@ -79,9 +79,11 @@ module.exports = function (modelName) {
 
             var arg = req.parameters;
 
+            console.log("ARGS: " , arg);
+
             global[modelName].update(arg, function (err, result) {
                 if (err) {
-                    res.status(400).json({error: err.message});
+                    res.status(200).json({error: err.message});
                 } else {
 
                     if (result.affectedRows) {
@@ -89,7 +91,7 @@ module.exports = function (modelName) {
                         global[modelName].find({id:arg.id}, function (err, row) {
 
                             if (err) {
-                                res.status(400).json({error: err.message});
+                                res.status(200).json({error: err.message});
                             } else {
                                 global[modelName].publishUpdate(req, row);
                                 res.status(200).json(row);
@@ -110,7 +112,7 @@ module.exports = function (modelName) {
             global[modelName].counts(req.parameters, function (err, rows) {
 
                 if (err) {
-                    res.status(400).json({error: err.message});
+                    res.status(200).json({error: err.message});
                 } else {
                     res.status(200).json(rows);
                 }

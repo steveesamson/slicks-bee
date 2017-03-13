@@ -90,7 +90,8 @@ module.exports = function (model) {
                     if (options[key]) {
                         if (rows.length) {
                             var rec = rows[0];
-                            if (self.exclude && self.exclude.length) {
+
+                            if (!options.relax_exclude && self.exclude && self.exclude.length) {
                                 self.exclude.forEach(function (x) {
                                     delete rec[x];
                                 });
@@ -120,13 +121,14 @@ module.exports = function (model) {
         },
         find: function (options, cb) {
 
+            var self = this;
             if (options['ROW_COUNT']) {
                 this.counts(options, cb);
                 return;
             }
 
             for (var attr in this.attributes) {
-                if (options[attr]) {
+                if (attr in options) {
                     this.db.where(modelName + '.' + attr, options[attr]);
                 }
             }
@@ -139,10 +141,14 @@ module.exports = function (model) {
             if (options.orderby) {
                 this.db.orderBy(options.orderby, options.direction);
             } else {
-                this.db.orderBy(modelName + '.id', 'DESC');
+                if(self.orderBy){
+                    var direction = self.orderDirection || 'ASC';
+                    this.db.orderBy(modelName + '.' + self.orderBy, direction);
+
+                }else  this.db.orderBy(modelName + '.id', 'ASC');
             }
 
-            var self = this;
+
             this.db.fetch(modelName, function (err, rows) {
 
                 self.prepareResult(err, rows, options, cb);
@@ -158,7 +164,7 @@ module.exports = function (model) {
         },
         counts: function (options, cb) {
             for (var attr in this.attributes) {
-                if (options[attr]) {
+                if (attr in options) {
                     this.db.where(modelName + '.' + attr, options[attr]);
                 }
             }
@@ -213,7 +219,7 @@ module.exports = function (model) {
                 delete options[this.checkConcurrentUpdate];
             }
             for (var attr in this.attributes) {
-                if (attr !== 'id' && options[attr]) {
+                if (attr !== 'id' && (attr in options)) {
                     this.db.set(attr, options[attr]);
                 }
             }
@@ -238,7 +244,7 @@ module.exports = function (model) {
                     continue;
                 }
 
-                if (options[attr]) {
+                if (attr in options) {
                     validOptions[attr] = options[attr];
                 }
             }

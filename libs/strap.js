@@ -1,7 +1,14 @@
 /**
  * Created by steve Samson <stevee.samson@gmail.com> on 2/7/14.
  */
-var fs = require('fs');
+var fs = require('fs'),
+    ext = function (fileName) {
+
+        var result = fileName.split('.');
+
+        return result.length === 1 ? "" : '.' + result.pop();
+    };
+
 module.exports = function (head, resource) {
 
     //var router = express.Router();
@@ -82,11 +89,11 @@ module.exports = function (head, resource) {
         writeFileTo: function (req, options, cb) {
             //console.log(req.files);
             var file = req.files[options.load_name],
-                dest = options.save_as  + '.jpg' || file.name;
+                dest = options.save_as + ext(file.name);
                 file.renameTo(dest, function(e){
                     if (e) {
 
-                        cb && cb({text: 'Error while uploading -\'' + file.name + '\' ' + e.message, error: true});
+                        cb && cb({errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message});
 
                     } else {
                         dest = dest.replace(PUBLIC_DIR, '');
