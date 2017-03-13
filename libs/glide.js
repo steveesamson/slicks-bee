@@ -6,9 +6,7 @@ var express = require('express'),
     favicon = require('serve-favicon'),
     errorHandler = require('errorhandler'),
     morgan = require('morgan'),
-    //bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
-    //busboy = require('connect-busboy'),
     stud = require('stud');
 
 module.exports = function (resource) {
@@ -22,9 +20,6 @@ module.exports = function (resource) {
 
     app.use(morgan('dev'));                     // log every request to the console
     //app.use(favicon(PUBLIC_DIR + '/favicon.ico'));
-    //app.use(bodyParser.urlencoded({extended: false}));    // parse application/x-www-form-urlencoded
-    //app.use(bodyParser.json());  // parse application/json
-    //app.use(resource.slicksMultiparts({uploadDir:'tmp'}));
     app.use(resource.slicksMultiparts());
     app.use(methodOverride());                  // simulate DELETE and PUT
     app.use(resource.slickRouter);

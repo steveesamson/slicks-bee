@@ -12,4 +12,4 @@ module.exports = function(viewPath)
     {
         res.render(viewPath, {year:(new Date()).format('yyyy')});
     }
-}
+};
