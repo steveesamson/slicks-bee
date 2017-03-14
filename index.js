@@ -1,11 +1,10 @@
 /**
  * Created by steve samson <stevee.samson@gmail.com> on 2/4/14.
  */
-module.exports = function () {
+module.exports = function (base) {
 
 
-    var base = process.cwd(),
-        cluster = require('cluster'),
+    var cluster = require('cluster'),
         workers = {},
         count = require('os').cpus().length,
         spawn = function () {
