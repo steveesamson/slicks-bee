@@ -3,15 +3,23 @@
  */
 
 module.exports = function (model) {
-    var modelName = model.toLocaleLowerCase();
-    return  {
+    var modelName = model.toLocaleLowerCase(),
+        SMClean = require('smclean');
+
+    SMClean.double = SMClean.float;
+    SMClean.tinyint = function (str) {
+        if (str.length > 1) str = str.substring(0, 1);
+        return SMClean.int(str);
+    };
+
+    return {
         instanceName: model,
         socket: false,
         attributes: {},
         uniqueKeys: ['id', 'SUM', 'ROW_COUNT'],
         defaultDateValues: false, //{'withdrawn_date':''yyyy-mm-dd'}
         checkConcurrentUpdate: false,//'lastupdated'
-        joinSearch:[],//['users.user_id'] includes joins in searches.
+        joinSearch: [],//['users.user_id'] includes joins in searches.
         subscribe: function (req) {
             req.io.join(this.instanceName);
             console.log('Subscribed to %s', modelName);
@@ -45,6 +53,16 @@ module.exports = function (model) {
                 console.log('PublishDestroy to %s', modelName);
             }
         },
+        sanitizeParams:function(options){
+
+            var self = this;
+            for (var attr in this.attributes) {
+                if (attr in options) {
+                    var type = self.attributes[attr].toLowerCase();
+                    options[attr] = SMClean[type](options[attr]);
+                }
+            }
+        },
         search: function (searchString) {
             var self = this,
                 params = '';
@@ -52,9 +70,8 @@ module.exports = function (model) {
             if (searchString.length) {
                 params = searchString.split(/\s/);
                 var attrCopy = utils.clone(self.attributes);
-                if(self.joinSearch && self.joinSearch.length)
-                {
-                    self.joinSearch.forEach(function(f){
+                if (self.joinSearch && self.joinSearch.length) {
+                    self.joinSearch.forEach(function (f) {
                         attrCopy[f] = 'string';
                     });
                 }
@@ -63,10 +80,10 @@ module.exports = function (model) {
                     for (var attr in attrCopy) {
                         if (attrCopy[attr] === 'string') {
                             if (index === 0) {
-                                self.db.like( attr.indexOf('.') == -1 ?  (modelName + '.' + attr): attr, pa, 'both');
+                                self.db.like(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
                             } else {
 //                                self.db.orLike(modelName + '.' + attr, pa, 'both');
-                                self.db.orLike( attr.indexOf('.') == -1 ?  (modelName + '.' + attr): attr, pa, 'both');
+                                self.db.orLike(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
                             }
                             ++index;
                         }
@@ -122,6 +139,7 @@ module.exports = function (model) {
         find: function (options, cb) {
 
             var self = this;
+            this.sanitizeParams(options);
             if (options['ROW_COUNT']) {
                 this.counts(options, cb);
                 return;
@@ -141,11 +159,11 @@ module.exports = function (model) {
             if (options.orderby) {
                 this.db.orderBy(options.orderby, options.direction);
             } else {
-                if(self.orderBy){
+                if (self.orderBy) {
                     var direction = self.orderDirection || 'ASC';
                     this.db.orderBy(modelName + '.' + self.orderBy, direction);
 
-                }else  this.db.orderBy(modelName + '.id', 'ASC');
+                } else  this.db.orderBy(modelName + '.id', 'ASC');
             }
 
 
@@ -157,12 +175,16 @@ module.exports = function (model) {
         },
         rowCount: function (query, options, cb) {
             var self = this;
+            this.sanitizeParams(options);
+
             query = "select COUNT(*) AS count  from (" + query + ") ex";
             this.db.query(query, function (err, rows) {
                 self.prepareResult(err, rows, options, cb);
             });
         },
         counts: function (options, cb) {
+            this.sanitizeParams(options);
+
             for (var attr in this.attributes) {
                 if (attr in options) {
                     this.db.where(modelName + '.' + attr, options[attr]);
@@ -186,6 +208,8 @@ module.exports = function (model) {
         },
         destroy: function (options, cb) {
 
+            this.sanitizeParams(options);
+
             if (!options.id) {
                 var err = new Error('You need an id to destroy any model');
                 (cb && cb(err));
@@ -208,6 +232,10 @@ module.exports = function (model) {
                 });
         },
         update: function (options, cb) {
+
+
+            this.sanitizeParams(options);
+
             if (!options.id) {
                 var err = new Error('You need an id to update any model');
                 (cb && cb(err));
@@ -236,6 +264,9 @@ module.exports = function (model) {
                 });
         },
         create: function (options, cb) {
+
+            this.sanitizeParams(options);
+
             var validOptions = {},
                 self = this;
             for (var attr in this.attributes) {
