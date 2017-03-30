@@ -6,6 +6,9 @@ var fs = require('fs'),
     _ = require('underscore'),
     denyAll = require('./denyAll'),
     allowAll = require('./allowAll'),
+    jwt = require('jsonwebtoken'),
+    saltRounds = 10,
+    bcrypt = require('bcryptjs'),
     policies_path = null;
 
 
@@ -50,19 +53,19 @@ module.exports = function (base) {
         database_config = require(path.join(base, 'config', 'databases'));
 
 
-    policies_path = path.join(base , 'policies');
+    policies_path = path.join(base, 'policies');
 
 
     fs.readdirSync(models_path).forEach(function (model_name) {
         var base_name = path.basename(model_name, '.js');
-        models[base_name] = require(path.join(models_path , model_name));
+        models[base_name] = require(path.join(models_path, model_name));
 
     });
 
     fs.readdirSync(controllers_path).forEach(function (name) {
         var base_name = path.basename(name, '.js'),
             base_name = base_name.replace('Controller', '');
-        controllers[base_name] = require(path.join(controllers_path , name));
+        controllers[base_name] = require(path.join(controllers_path, name));
     });
 
     fs.readdirSync(middlewares_path).forEach(function (name) {
@@ -81,6 +84,35 @@ module.exports = function (base) {
     };
 
     global.BASE_DIR = base;
+    global.Token = {
+        sign: function (load) {
+            return jwt.sign(load, security.secret);
+        },
+        verify: function (token, cb) {
+            jwt.verify(token, security.secret,cb);
+        }
+    };
+
+    global.Encrypt = {
+        verify: function (plain, hash, cb) {
+            bcrypt.compare(plain, hash, cb);
+        },
+        hash: function (plain, cb) {
+
+            bcrypt.genSalt(saltRounds, function(err, salt) {
+
+                if (err) {
+
+                    return cb(err);
+                }
+
+                bcrypt.hash(plain, salt, cb);
+
+            });
+
+        }
+    };
+
     return {
         models: models,
         controllers: controllers,
