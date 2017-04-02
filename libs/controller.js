@@ -20,7 +20,7 @@ module.exports = {
     streampix: function (req, res) {
 
         SlicksDecoder.writeStreamTo(req, {save_as: PUBLIC_DIR + '/uploads/' + req.parameters.save_as + '.jpg'}, function (done) {
-            res.json(done);
+            res.status(200).json(done);
         });
     },
     croppix: function (req, res) {
@@ -31,10 +31,10 @@ module.exports = {
 //        console.log(path);
         gm(path).crop(params.w, params.h, params.x, params.y).write(path, function (e) {
             if (e) {
-                res.json({error: 'Error while cropping -\'' + params.src + '\' ' + e.message});
+                res.status(200).json({error: "Error while cropping -'" + params.src + "' " + e.message});
 
             } else {
-                res.json({text: 'Picture cropped successfully.', src: params.src});
+                res.status(200).json({text: 'Picture cropped successfully.', src: params.src});
             }
         });
     },
@@ -47,7 +47,7 @@ module.exports = {
             captcha = svgCaptcha.create(capOpts);
         captcha.data = encodeURIComponent(captcha.data);
         //console.log(captcha);
-        res.json(captcha);
+        res.status(200).json(captcha);
     },
     unlink: function (req, res) {
         var images = req.parameters.images,
@@ -69,21 +69,21 @@ module.exports = {
                     }
                 });
 
-                res.json({text: 'Images successfully deletes'});
+                res.status(200).json({text: 'Images successfully deletes'});
 
             } else {
                 var _path = PUBLIC_DIR + images[0];
                 fs.unlink(_path, function (e) {
                     if (e) {
-                        res.json({error: e.toString()});
+                        res.status(200).json({error: e.toString()});
                         return;
                     }
-                    res.json({text: path.basename(_path) + ' successfully deleted!'});
+                    res.status(200).json({text: path.basename(_path) + ' successfully deleted!'});
                 });
             }
 
         } else {
-            res.json({error: 'There are no images'});
+            res.status(200).json({error: 'There are no images'});
         }
 
     },
@@ -96,7 +96,7 @@ module.exports = {
 
 
             if (done.error || req.parameters.w === undefined || !req.parameters.w) {
-                res.json(done);
+                res.status(200).json(done);
                 return;
             }
 
@@ -107,13 +107,13 @@ module.exports = {
 
             //console.log('CORDS: ', coords);
             //if (done.error) {
-            //    res.json(done);
+            //    res.status(200).json(done);
             //    return;
             //}
             gm(path).size(function (e, size) {
 
                 if (e) {
-                    res.json({error: 'Error while getting image size -\'' + done.src + '\' ' + e.message});
+                    res.status(200).json({error: "Error while getting image size -'" + done.src + "' " + e.message});
                     return;
                 }
                 var sw = parseInt(size.width),
@@ -122,9 +122,9 @@ module.exports = {
 
                         gm(path).resize(w, h).write(path, function (e) {
                             if (e) {
-                                res.json({error: 'Error while resize -\'' + done.src + '\' ' + e.message});
+                                res.status(200).json({error: "Error while resizing -'" + done.src + "' " + e.message});
                             } else {
-                                res.json(done);
+                                res.status(200).json(done);
                             }
                         });
                     };
@@ -133,7 +133,7 @@ module.exports = {
                     var fs = require('fs');
                     fs.unlink(path, function (e) {
                     });
-                    res.json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
+                    res.status(200).json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
                     //} else if (sw > coords.w) {
                 } else {
                     resizeImage(coords.w, coords.h);
