@@ -2,7 +2,8 @@
  * Created by steve Samson <stevee.samson@gmail.com> on 2/5/14.
  */
 //var module.filename.slice(__filename.lastIndexOf('/')+1, module.filename.length -3);
-var svgCaptcha = require('svg-captcha');
+var svgCaptcha = require('svg-captcha'),
+    gm = require('gm');
 module.exports = {
 
     index: function (req, res) {
@@ -10,7 +11,7 @@ module.exports = {
     },
     xexcel: function (req, res) {
 
-        var file_name = "Konvaj_" + req.parameters['filename'];
+        var file_name = "nhiscoopers_" + req.parameters['filename'];
         res.setHeader("Content-Type", "application/vnd.ms-excel");
         res.setHeader("Content-Disposition", "attachment; filename=" + file_name + ".xls");
         res.setHeader("Pragma", "no-cache");
@@ -20,21 +21,23 @@ module.exports = {
     streampix: function (req, res) {
 
         SlicksDecoder.writeStreamTo(req, {save_as: PUBLIC_DIR + '/uploads/' + req.parameters.save_as + '.jpg'}, function (done) {
-            res.status(200).json(done);
+            res.json(done);
         });
     },
     croppix: function (req, res) {
 
+        console.log('croppix...');
+
         var params = req.parameters,
-            gm = require('gm'),
+            //gm = require('gm'),
             path = PUBLIC_DIR + params.src;
-//        console.log(path);
+        console.log(path);
         gm(path).crop(params.w, params.h, params.x, params.y).write(path, function (e) {
             if (e) {
-                res.status(200).json({error: "Error while cropping -'" + params.src + "' " + e.message});
+                res.json({error: 'Error while cropping -\'' + params.src + '\' ' + e.message});
 
             } else {
-                res.status(200).json({text: 'Picture cropped successfully.', src: params.src});
+                res.json({text: 'Picture cropped successfully.', src: params.src});
             }
         });
     },
@@ -47,21 +50,21 @@ module.exports = {
             captcha = svgCaptcha.create(capOpts);
         captcha.data = encodeURIComponent(captcha.data);
         //console.log(captcha);
-        res.status(200).json(captcha);
+        res.json(captcha);
     },
     unlink: function (req, res) {
-        var images = req.parameters.images,
+        var attachments = req.parameters.attachments,
             path = require('path'),
             fs = require('fs');
-        if (images) {
+        if (attachments) {
 
-            images = images.split(',');
+            attachments = attachments.split(',');
 
-            if (images.length > 1) {
+            if (attachments.length > 1) {
 
-                images.forEach(function (image) {
+                attachments.forEach(function (attachement) {
 
-                    var _path = PUBLIC_DIR + image;
+                    var _path = PUBLIC_DIR + attachement;
                     try {
                         fs.unlinkSync(_path);
                     } catch (e) {
@@ -69,21 +72,21 @@ module.exports = {
                     }
                 });
 
-                res.status(200).json({text: 'Images successfully deletes'});
+                res.json({text: 'Attachment successfully deletes'});
 
             } else {
-                var _path = PUBLIC_DIR + images[0];
+                var _path = PUBLIC_DIR + attachments[0];
                 fs.unlink(_path, function (e) {
                     if (e) {
-                        res.status(200).json({error: e.toString()});
+                        res.json({error: e.toString()});
                         return;
                     }
-                    res.status(200).json({text: path.basename(_path) + ' successfully deleted!'});
+                    res.json({text: path.basename(_path) + ' successfully deleted!'});
                 });
             }
 
         } else {
-            res.status(200).json({error: 'There are no images'});
+            res.json({error: 'There are no attachments'});
         }
 
     },
@@ -96,7 +99,7 @@ module.exports = {
 
 
             if (done.error || req.parameters.w === undefined || !req.parameters.w) {
-                res.status(200).json(done);
+                res.json(done);
                 return;
             }
 
@@ -107,13 +110,13 @@ module.exports = {
 
             //console.log('CORDS: ', coords);
             //if (done.error) {
-            //    res.status(200).json(done);
+            //    res.json(done);
             //    return;
             //}
             gm(path).size(function (e, size) {
 
                 if (e) {
-                    res.status(200).json({error: "Error while getting image size -'" + done.src + "' " + e.message});
+                    res.json({error: 'Error while getting image size -\'' + done.src + '\' ' + e.message});
                     return;
                 }
                 var sw = parseInt(size.width),
@@ -122,9 +125,9 @@ module.exports = {
 
                         gm(path).resize(w, h).write(path, function (e) {
                             if (e) {
-                                res.status(200).json({error: "Error while resizing -'" + done.src + "' " + e.message});
+                                res.json({error: 'Error while resize -\'' + done.src + '\' ' + e.message});
                             } else {
-                                res.status(200).json(done);
+                                res.json(done);
                             }
                         });
                     };
@@ -133,7 +136,7 @@ module.exports = {
                     var fs = require('fs');
                     fs.unlink(path, function (e) {
                     });
-                    res.status(200).json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
+                    res.json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
                     //} else if (sw > coords.w) {
                 } else {
                     resizeImage(coords.w, coords.h);

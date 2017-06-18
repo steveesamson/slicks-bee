@@ -2,7 +2,6 @@
  * Created by steve Samson <stevee.samson@gmail.com> on 2/6/14.
  */
 var express = require('express'),
-//cons = require('consolidate');
     favicon = require('serve-favicon'),
     errorHandler = require('errorhandler'),
     morgan = require('morgan'),
@@ -14,11 +13,12 @@ module.exports = function (resource) {
 
 
     app.set('port', resource.config.application.port);
-    app.set('views', VIEW_DIR);
-    app.engine('stud', stud.__express);
-    app.set('view engine', resource.config.views.engine);
 
-    app.use(morgan('dev'));                     // log every request to the console
+    //app.set('views', VIEW_DIR);
+    //app.engine('stud', stud.__express);
+    //app.set('view engine', resource.config.views.engine);
+
+    //app.use(morgan('dev'));                     // log every request to the console
     //app.use(favicon(PUBLIC_DIR + '/favicon.ico'));
     app.use(resource.slicksMultiparts());
     app.use(methodOverride());                  // simulate DELETE and PUT

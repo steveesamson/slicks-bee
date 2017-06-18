@@ -11,12 +11,8 @@ var fs = require('fs'),
     bcrypt = require('bcryptjs'),
     policies_path = null;
 
-
 module.exports = function (base) {
 
-    String.prototype.startsWith = function (prefix) {
-        return this.indexOf(prefix) === 0;
-    };
 
     global['DateTime'] = function (_format) {
         var dateFormat = require('./dateformat')();

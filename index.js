@@ -5,6 +5,9 @@ module.exports = function (base) {
 
 
     var cluster = require('cluster'),
+        stud = require('stud'),
+        fs = require('fs'),
+        path = require('path'),
         workers = {},
         count = require('os').cpus().length,
         spawn = function () {
@@ -28,15 +31,35 @@ module.exports = function (base) {
             
 
             if (cluster.isMaster) {
-                for (var i = 0; i < count; i++) {
-                    spawn();
-                }
-                console.log("SlicksBee binds on port %s @ %s",  glider.get('port'), DateTime() );
-                cluster.on('death', function(worker) {
-                    console.log('worker ' + worker.pid + ' died. spawning a new process...');
-                    delete workers[worker.pid];
-                    spawn();
-                });
+
+                    var assetVersion = (new Date()).getTime();
+                    stud.__express(path.join(VIEW_DIR, 'index.stud'),{year: DateTime('yyyy'), script:'/js/a_.js?v=' + assetVersion, style:'/css/a_.css?v=' + assetVersion},function(e, renderedString){
+
+                        var f = path.join(PUBLIC_DIR, 'index.html');
+
+                        fs.writeFile(f, renderedString, function (err) {
+                            if (err) {
+
+                                return console.log(err);
+                            }
+                            console.log('File ' + f + ' written.');
+
+                            for (var i = 0; i < count; i++) {
+                                spawn();
+                            }
+                            console.log("SlicksBee binds on port %s @ %s",  glider.get('port'), DateTime() );
+                            cluster.on('death', function(worker) {
+                                console.log('worker ' + worker.pid + ' died. spawning a new process...');
+                                delete workers[worker.pid];
+                                spawn();
+                            });
+
+                        });
+
+                    });
+
+
+
             } else {
                 var worker_id = 'Worker' + cluster.worker.id;
 
@@ -47,7 +70,14 @@ module.exports = function (base) {
         };
 
 
+
+
+
+
     //console.log(resource.routes);
+
+
+
 
     if (cfg.item) {
         dbUtils.load(cfg, dbUtils.handler, start);

@@ -3,8 +3,6 @@
  */
 
 module.exports = function (model) {
-
-
     var modelName = model.toLocaleLowerCase(),
         skipCleanKey = '~|',
         SMClean = require('smclean');
@@ -14,6 +12,12 @@ module.exports = function (model) {
         if (str.length > 1) str = str.substring(0, 1);
         return SMClean.int(str);
     };
+
+    if (typeof String.prototype.startsWith == 'undefined') {
+        String.prototype.startsWith = function (prefix) {
+            return this.indexOf(prefix) === 0;
+        };
+    }
 
     return {
         instanceName: model,
@@ -67,9 +71,9 @@ module.exports = function (model) {
                     var type = self.attributes[attr].toLowerCase();
 
                     if(type === 'string'  && value && (value + '').startsWith(skipCleanKey) ){
-                        value = value.substring(2);
-                        options[attr] = value;
-                        continue;
+                            value = value.substring(2);
+                            options[attr] = value;
+                            continue;
                     }
 
                     options[attr] = SMClean[type](options[attr]);

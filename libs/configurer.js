@@ -4,8 +4,8 @@
 var baseModel = require('./model'),
     baseController = require('./controller'),
     restController = require('./rest'),
-    default_path = require('./default_path'),
-    indexController = require('./IndexController');
+    default_path = require('./default_path');
+    //indexController = require('./IndexController');
 
 module.exports = function (resource) {
 
@@ -77,6 +77,7 @@ module.exports = function (resource) {
                     restRoutes['post /' + key.toLowerCase()] = 'create';
                     restRoutes['put /' + key.toLowerCase() + '/:id'] = 'update';
                     restRoutes['delete /' + key.toLowerCase() + '/:id'] = 'destroy';
+                    restRoutes['get /' + key.toLowerCase() + '/croppix'] = 'croppix';
                     restRoutes['post /' + key.toLowerCase() + '/streampix'] = 'streampix';
                     restRoutes['post /' + key.toLowerCase() + '/uploadpix'] = 'uploadpix';
                     restRoutes['post /' + key.toLowerCase() + '/xexcel'] = 'xexcel';
@@ -125,11 +126,11 @@ module.exports = function (resource) {
                 }
             }
             //add default route and the handler
-            if (!controllers['Index']) {
-                controllers['Index'] = indexController(resource.config.views.index_file);
-                routes['Index'] = { 'get /': 'index'};
-
-            }
+            //if (!controllers['Index']) {
+            //    controllers['Index'] = indexController(resource.config.views.index_file);
+            //    routes['Index'] = { 'get /': 'index'};
+            //
+            //}
             resource['routes'] = routes;
 
         },
