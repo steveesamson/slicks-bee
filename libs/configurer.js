@@ -61,7 +61,7 @@ module.exports = function (resource) {
                     funcs = utils.functions(controla);
 
                     if (resource.config.controllers.rest) {
-                        ['create', 'update', 'destroy', 'find', 'counts', 'capturepix', 'uploadpix', 'xexcel'].forEach(function (restac) {
+                        ['create', 'update', 'destroy', 'find', 'counts', 'streampix', 'uploadpix', 'xexcel','unlink','spinx','croppix'].forEach(function (restac) {
                             funcs = utils.without(funcs, restac);
                         })
                     }
