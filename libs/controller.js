@@ -26,7 +26,6 @@ module.exports = {
     },
     croppix: function (req, res) {
 
-        console.log('croppix...');
 
         var params = req.parameters,
             //gm = require('gm'),
@@ -72,7 +71,7 @@ module.exports = {
                     }
                 });
 
-                res.json({text: 'Attachment successfully deletes'});
+                res.json({text: 'Attachment successfully deleted.'});
 
             } else {
                 var _path = PUBLIC_DIR + attachments[0];
