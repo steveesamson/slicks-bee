@@ -1,8 +1,6 @@
 assets
 config
 controllers
-layouts
-master
 middlewares
 models
 node_modules
@@ -12,5 +10,6 @@ sql
 tmp
 views
 app.js
+gulpfile.js
 TODO
 .idea
