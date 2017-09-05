@@ -1,13 +1,26 @@
 /**
  * Created by steve Samson <stevee.samson@gmail.com> on 2/5/14.
  */
-//var module.filename.slice(__filename.lastIndexOf('/')+1, module.filename.length -3);
 var svgCaptcha = require('svg-captcha'),
     gm = require('gm');
 module.exports = {
 
     index: function (req, res) {
         res.sendStatus(200);
+    },
+    appresources:function(req, res){
+
+        var load = req.parameters;
+        if(load.name){
+            return res.status(200).json(utils.filter(appResources, function(r){ return r.name === load.name;}));
+        }
+
+        if(load.search){
+            return res.status(200).json(utils.filter(appResources, function(r){ return r.name.toLowerCase().indexOf(load.search.toLowerCase()) !== -1;}));
+        }
+
+
+        res.status(200).json(appResources);
     },
     xexcel: function (req, res) {
 
@@ -30,7 +43,7 @@ module.exports = {
         var params = req.parameters,
             //gm = require('gm'),
             path = PUBLIC_DIR + params.src;
-        console.log(path);
+        //console.log(path);
         gm(path).crop(params.w, params.h, params.x, params.y).write(path, function (e) {
             if (e) {
                 res.json({error: 'Error while cropping -\'' + params.src + '\' ' + e.message});
@@ -89,6 +102,7 @@ module.exports = {
         }
 
     },
+
     uploadpix: function (req, res) {
 
         SlicksDecoder.writeFileTo(req, {

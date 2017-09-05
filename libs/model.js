@@ -37,26 +37,26 @@ module.exports = function (model) {
         },
         publishCreate: function (req, load) {
 //            slickIO.room(this.instanceName).broadcast('created', {message: load});
-            if (req.io && req.io.room) {
+            if (req.io) {
 
                 var pload = {verb: 'create', room: modelName, data: load};
-                req.io.room(this.instanceName).broadcast('comets', pload);
+                req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
         },
         publishUpdate: function (req, load) {
 //            slickIO.room(this.instanceName).broadcast('updated', {message: load});
-            if (req.io && req.io.room) {
+            if (req.io) {
                 var pload = {verb: 'update', data: load, room: modelName};
-                req.io.room(this.instanceName).broadcast('comets', pload);
+                req.io.broadcast.emit('comets', pload);
                 console.log('PublishUpdate to %s', modelName);
             }
         },
         publishDestroy: function (req, load) {
 //            slickIO.room(this.instanceName).broadcast('destroyed', {message: load});
-            if (req.io && req.io.room) {
+            if (req.io) {
                 var pload = {data: load, verb: 'destroy', room: modelName};
-                req.io.room(this.instanceName).broadcast('comets', pload);
+                req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
             }
         },
@@ -259,10 +259,20 @@ module.exports = function (model) {
                 return;
             }
 
+            //if (this.checkConcurrentUpdate) {
+            //    this.db.where(this.checkConcurrentUpdate, options[this.checkConcurrentUpdate]);
+            //    delete options[this.checkConcurrentUpdate];
+            //}
+
             if (this.checkConcurrentUpdate) {
+
                 this.db.where(this.checkConcurrentUpdate, options[this.checkConcurrentUpdate]);
+
+                this.db.set(this.checkConcurrentUpdate, parseInt(options[this.checkConcurrentUpdate]) +  1);
+
                 delete options[this.checkConcurrentUpdate];
             }
+
             for (var attr in this.attributes) {
                 if (attr !== 'id' && (attr in options)) {
                     this.db.set(attr, options[attr]);

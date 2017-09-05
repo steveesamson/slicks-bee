@@ -65,11 +65,14 @@ module.exports = function (modelName) {
 
                 } else {
 
-                    if (result.affectedRows) {
+                    if (parseInt(result.affectedRows)) {
                         var load = {id: arg.id};
                         global[modelName].publishDestroy(req, load);
+                        res.status(200).json(result);
+                    }else{
+                        res.status(200).json({error:'Delete was not successful, probably this record has been updated since your last fetch'});
                     }
-                    res.status(200).json(result);
+
                 }
 
 
@@ -79,14 +82,12 @@ module.exports = function (modelName) {
 
             var arg = req.parameters;
 
-            console.log("ARGS: " , arg);
-
             global[modelName].update(arg, function (err, result) {
                 if (err) {
                     res.status(200).json({error: err.message});
                 } else {
 
-                    if (result.affectedRows) {
+                    if (parseInt(result.affectedRows)) {
 
                         global[modelName].find({id:arg.id}, function (err, row) {
 
@@ -99,7 +100,7 @@ module.exports = function (modelName) {
                         });
 
                     }else{
-                        res.status(200).json({});
+                        res.status(200).json({error:'Update was not successful, probably this record has been updated since your last fetch.'});
                     }
 
                 }

@@ -14,6 +14,23 @@ var fs = require('fs'),
 module.exports = function (base) {
 
 
+    String.prototype.startsWith = function (prefix) {
+        return this.indexOf(prefix) === 0;
+    };
+
+
+    if (typeof String.prototype.endsWith == 'undefined') {
+        String.prototype.endsWith = function (suffix) {
+            return this.indexOf(suffix, this.length - suffix.length) !== -1;
+        };
+    }
+
+    if (!Array.isArray) {
+        Array.isArray = function (arg) {
+            return Object.prototype.toString.call(arg) === '[object Array]';
+        };
+    }
+
     global['DateTime'] = function (_format) {
         var dateFormat = require('./dateformat')();
         // For convenience...
@@ -40,6 +57,7 @@ module.exports = function (base) {
     global['security'] = require(path.join(base, 'config', 'security'));
 
     var controllers = {},
+        appResources = [],
         models = {},
         middlewares = [],
         controllers_path = path.join(base, 'controllers'),
@@ -58,6 +76,7 @@ module.exports = function (base) {
 
     fs.readdirSync(models_path).forEach(function (model_name) {
         var base_name = path.basename(model_name, '.js');
+        appResources.push({name: base_name});
         models[base_name] = require(path.join(models_path, model_name));
 
     });
@@ -89,7 +108,7 @@ module.exports = function (base) {
             return jwt.sign(load, security.secret);
         },
         verify: function (token, cb) {
-            jwt.verify(token, security.secret,cb);
+            jwt.verify(token, security.secret, cb);
         }
     };
 
@@ -99,7 +118,7 @@ module.exports = function (base) {
         },
         hash: function (plain, cb) {
 
-            bcrypt.genSalt(saltRounds, function(err, salt) {
+            bcrypt.genSalt(saltRounds, function (err, salt) {
 
                 if (err) {
 
@@ -113,6 +132,7 @@ module.exports = function (base) {
         }
     };
 
+    global.appResources = appResources;
     return {
         models: models,
         controllers: controllers,
@@ -144,15 +164,16 @@ var loadPolicies = function (_policies) {
 
         var policies = [];
 
-        _policies.forEach(function (poly) {
-            poly = poly.trim();
+        for(var i=0; i < _policies.length; ++i){
+
+            var poly = _policies[i].trim();
             if (poly === 'denyAll') {
                 policies.push(denyAll);
-                return;
+                break;
             }
             if (poly === 'allowAll') {
                 policies.push(allowAll);
-                return;
+                break;
             }
             var fullpath = path.join(policies_path, poly),
                 exists = fs.existsSync(fullpath + '.js');
@@ -165,7 +186,8 @@ var loadPolicies = function (_policies) {
             } else {
                 console.warn('Policy definition for: ' + poly + ' is undefined');
             }
-        });
+
+        }
         return policies;
 
     },
@@ -185,24 +207,27 @@ var loadPolicies = function (_policies) {
         //For IO Requests.
 
 
-        var data = JSON.parse(req.data);
-        req.url = data.url;
-        req.path = data.url;
+        //var data = JSON.parse(req.data);
+        //req.url = data.url;
         req.method = mtd;
+
         if (mtd === 'post' || mtd === 'put') {
-            req.body = data.data;
+            req.body = req.data;
         } else {
-            req.query = data.data;
+            req.query = req.data;
         }
 
-        var result = req.path.match(/\/\w+\/(\d+)/i);
+        var result = req.path.match(/(\/\w+)\/(\d+)/i);
+
+
 
         if (result) {
             if (!req.body) {
-                req.body = {id: result[1]};
+                req.body = {id: result[2]};
             } else {
-                req.body['id'] = result[1];
+                req.body['id'] = result[2];
             }
+            req.path = req.method === 'get'? result[1] : result[1] + '/:id';
 
         }
         var tok = {};
@@ -210,8 +235,8 @@ var loadPolicies = function (_policies) {
             tok['x-csrf-token'] = req.headers['x-csrf-token'];
         }
         req.parameters = utils.extend({}, tok, req.query, req.body, req.params);
+        delete req.data;
+        delete req.query;
+        delete req.body;
+        delete req.params;
     };
-
-
-
-

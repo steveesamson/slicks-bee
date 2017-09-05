@@ -2,6 +2,10 @@
  * Created by steve Samson <stevee.samson@gmail.com> on 2/7/14.
  */
 var fs = require('fs'),
+    copyArray = function (c) {
+
+        return c.slice(0, c.length);
+    },
     ext = function (fileName) {
 
         var result = fileName.split('.');
@@ -9,20 +13,28 @@ var fs = require('fs'),
         return result.length === 1 ? "" : '.' + result.pop();
     };
 
-module.exports = function (head, resource) {
+module.exports = function (app, resource) {
 
+    var ioRoutes = {
+        get: {},
+        post: {},
+        'delete': {},
+        put: {}
+    };
     //var router = express.Router();
     /*
      Bind middlewares;
      */
     if (resource.middlewares) {
 
-        head.all('*', resource.middlewares);
+        app.all('*', resource.middlewares);
         //for(var i=0;i<resource.middlewares.length; ++i){
         //    router.use(resource.middlewares[i]);
         //}
     }
     var globalPolicy = resource.policies.global;
+
+    //console.log('RTS:', resource.routes);
 
     /*
      bind / route first
@@ -33,12 +45,15 @@ module.exports = function (head, resource) {
             myPolicy = resource.policies['Index'],
             myGlobalPolicy = myPolicy && myPolicy['global'];
 
+
+
+
         for (var path in route) {
             var handler_name = route[path],
                 normalized = resource.normalizePath(path),
                 policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
 
-            head[normalized.method](normalized.path, policy, controller[handler_name]);
+            app[normalized.method](normalized.path, policy, controller[handler_name]);
 
 
         }
@@ -63,72 +78,114 @@ module.exports = function (head, resource) {
                 normalized = resource.normalizePath(path),
                 policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
 //            console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
-            head[normalized.method](normalized.path, policy, controller[handler_name]);
-            // console.log(normalized);
+            app[normalized.method](normalized.path, policy, controller[handler_name]);
+            //ioRoutes[normalized.method][normalized.path] = {policy:policy,handler:controller[handler_name]};
+
+            ioRoutes[normalized.method][normalized.path] = (function (_policy, _handler) {
+
+                return function (req, res) {
+
+                    var _policies = copyArray(_policy),
+                        next = function () {
+                            _policies.length && _policies.shift()(req, res, next);
+                        };
+
+                    _policies.push(_handler);
+
+                    //console.log('Polices: ', _policies.toString());
+
+                    next();
+
+                }
+
+            })(policy, controller[handler_name]);
         }
 
     }
-//    global['slickIO'] = head.io;
 
-    
+    //console.log('ioRoutes: ', ioRoutes);
+
+
     global['SlicksDecoder'] = {
         writeStreamTo: function (req, options, cb) {
 
             var dest = options.save_as,
                 ws = fs.createWriteStream(dest);
-            req.on('data',function (chunk) {
+            req.on('data', function (chunk) {
                 ws.write(chunk);
             }).on('end', function () {
-                    ws.destroySoon();
-                    ws.on('close', function () {
-                        dest = dest.replace(PUBLIC_DIR, '');
-                        cb && cb({text: 'Web capture was successful.', src: dest});
-                    });
+                ws.destroySoon();
+                ws.on('close', function () {
+                    dest = dest.replace(PUBLIC_DIR, '');
+                    cb && cb({text: 'Web capture was successful.', src: dest});
                 });
+            });
         },
         writeFileTo: function (req, options, cb) {
             //console.log(req.files);
             var file = req.files[options.load_name],
                 dest = options.save_as + ext(file.name);
-                file.renameTo(dest, function(e){
-                    if (e) {
+            file.renameTo(dest, function (e) {
+                if (e) {
 
-                        cb && cb({errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message});
+                    cb && cb({errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message});
 
-                    } else {
-                        dest = dest.replace(PUBLIC_DIR, '');
-                        cb && cb({text: 'Picture uploaded successfully.', src: dest});
-                    }
-                });
+                } else {
+                    dest = dest.replace(PUBLIC_DIR, '');
+                    cb && cb({text: 'Picture uploaded successfully.', src: dest});
+                }
+            });
 
 
         }
     };
 
 
-//    var bindSocketRoutes = function (method) {
-//        head.io.route(method, function (req) {
-//
-////            var data = JSON.parse(req.data);
-//
-////            console.log("url: %s, mtd: %s, data:%s",data.url, method, data.data);
-//
-//            var g = req.io,
-//                res = {json: g.respond, send: g.respond};
-//            resource.decorateReq(req, method);
-//            head.router(req, res);
-//
-//
-//        });
-//    };
-//
-//    ['get', 'post', 'delete', 'put', 'subscribe', 'unsubscribe'].forEach(function (method) {
-//        bindSocketRoutes(method);
-//    });
+    app.io.sockets.on('connection', function (socket) {
+
+        console.log('Connected: ', socket.id);
+
+
+        socket.once('disconnect', function () {
+            console.log('disconnecting...');
+            socket.disconnect();
+        });
+
+        ['get', 'post', 'delete', 'put'].forEach(function (method) {
+            socket.on(method, function (req, cb) {
+
+
+                var res = {
+                    json: cb,
+                    status: function (stat) {
+                        res.status = stat;
+                        return res;
+                    }
+                };
+
+
+                resource.decorateReq(req, method);
+
+                req.io = socket;
+                req.url = req.path;
+
+
+                //console.log("Path: ",req.path);
+                //console.log("Params: ", req.parameters);
+
+
+
+                //ioRoutes[method][req.path]['handler'](req, res);
+                ioRoutes[method][req.path](req, res);
+
+                //app.runMiddleware(req.path, socket,function(code,body,headers){
+                //    console.log('Code:%s, Body:%s,  Headers:%s',code, body, headers);
+                //});
+
+
+            });
+        });
+    });
+
 
 };
-
-
-
-
-
