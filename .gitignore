@@ -11,5 +11,6 @@ tmp
 views
 app.js
 gulpfile.js
+npm-debug.log
 TODO
 .idea

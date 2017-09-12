@@ -62,7 +62,7 @@ module.exports = function (base) {
                 // worker index distribution only much faster.
                 var worker_index = function(ip, len) {
 
-                    return farmhash.fingerprint32(''+ip[i]) % len; // Farmhash is the fastest and works with IPv6, too
+                    return farmhash.fingerprint32(ip) % len; // Farmhash is the fastest and works with IPv6, too
                 };
 
                 stud.__express(path.join(VIEW_DIR, 'index.stud'),{year: DateTime('yyyy'), script:'/js/a_.js?v=' + assetVersion, style:'/css/a_.css?v=' + assetVersion},function(e, renderedString){

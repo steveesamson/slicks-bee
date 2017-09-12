@@ -4,7 +4,7 @@
   "description": "Slicks Back-End-Engine, slicks-bee, is a robust and high traffic NodeJS web framework developped on Expressjs 4+.",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "start": "node  app"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,6 @@
     "gm": "^1.23.0",
     "jsonwebtoken": "^7.1.9",
     "method-override": "^2.3.6",
-    "morgan": "^1.7.0",
     "smclean": "^1.0.1",
     "socketio-jwt": "^4.5.0",
     "strbuilder": "^1.2.0",
@@ -62,6 +61,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-stud": "^1.0.2",
     "gulp-uglify": "^2.1.0",
-    "jshint": "^2.9.4"
+    "jshint": "^2.9.4",
+    "shortid": "^2.2.8"
   }
 }
