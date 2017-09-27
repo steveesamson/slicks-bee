@@ -4,5 +4,5 @@
 module.exports = function(req, res, next)
 {
     console.log('Unauthorized Access to ' + req.url);
-    res.json({error:'Unauthorized'},401);
+    res.status(401).json({error:'Unauthorized'});
 };

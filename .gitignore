@@ -12,5 +12,6 @@ views
 app.js
 gulpfile.js
 npm-debug.log
+libs.o
 TODO
 .idea

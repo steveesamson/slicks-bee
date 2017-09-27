@@ -11,8 +11,8 @@ var fs = require('fs'),
     bcrypt = require('bcryptjs'),
     policies_path = null;
 
-module.exports = function (base) {
 
+module.exports = function (base) {
 
     String.prototype.startsWith = function (prefix) {
         return this.indexOf(prefix) === 0;
@@ -108,7 +108,7 @@ module.exports = function (base) {
             return jwt.sign(load, security.secret);
         },
         verify: function (token, cb) {
-            jwt.verify(token, security.secret, cb);
+            jwt.verify(token, security.secret,cb);
         }
     };
 
@@ -118,7 +118,7 @@ module.exports = function (base) {
         },
         hash: function (plain, cb) {
 
-            bcrypt.genSalt(saltRounds, function (err, salt) {
+            bcrypt.genSalt(saltRounds, function(err, salt) {
 
                 if (err) {
 
@@ -164,30 +164,31 @@ var loadPolicies = function (_policies) {
 
         var policies = [];
 
-        for(var i=0; i < _policies.length; ++i){
+       for(var i=0; i < _policies.length; ++i){
 
-            var poly = _policies[i].trim();
-            if (poly === 'denyAll') {
-                policies.push(denyAll);
-                break;
-            }
-            if (poly === 'allowAll') {
-                policies.push(allowAll);
-                break;
-            }
-            var fullpath = path.join(policies_path, poly),
-                exists = fs.existsSync(fullpath + '.js');
-            if (exists) {
+           var poly = _policies[i].trim();
+           if (poly === 'denyAll') {
+               policies.push(denyAll);
+               break;
+           }
+           if (poly === 'allowAll') {
+               policies.push(allowAll);
+               break;
+           }
+           var fullpath = path.join(policies_path, poly),
+               exists = fs.existsSync(fullpath + '.js');
+           if (exists) {
 
-                var policy = require(fullpath);
+               var policy = require(fullpath);
 
-                policies.push(policy);
+               policies.push(policy);
 
-            } else {
-                console.warn('Policy definition for: ' + poly + ' is undefined');
-            }
+           } else {
+               console.warn('Policy definition for: ' + poly + ' is undefined');
+           }
 
-        }
+       }
+
         return policies;
 
     },
@@ -240,3 +241,7 @@ var loadPolicies = function (_policies) {
         delete req.body;
         delete req.params;
     };
+
+
+
+

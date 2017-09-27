@@ -6,7 +6,6 @@
 module.exports = function (req, res, next) {
 
 
-
     var result = req.path.match(/\/\w+\/(\d+)/i);
 
     if (result) {
@@ -14,10 +13,10 @@ module.exports = function (req, res, next) {
         req.body['id'] = result[1];
     }
     var tok = {};
-    if(req.headers && req.headers['x-csrf-token']){
+    if (req.headers && req.headers['x-csrf-token']) {
         tok['x-csrf-token'] = req.headers['x-csrf-token'];
     }
-    req.parameters = utils.extend({},tok, req.query, req.body);
+    req.parameters = utils.extend({}, tok, req.query, req.body);
     next();
 };
 

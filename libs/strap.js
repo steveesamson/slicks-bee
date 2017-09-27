@@ -77,7 +77,7 @@ module.exports = function (app, resource) {
             var handler_name = route[path],
                 normalized = resource.normalizePath(path),
                 policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
-//            console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
+            //console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
             app[normalized.method](normalized.path, policy, controller[handler_name]);
             //ioRoutes[normalized.method][normalized.path] = {policy:policy,handler:controller[handler_name]};
 
@@ -170,6 +170,7 @@ module.exports = function (app, resource) {
                 req.url = req.path;
 
 
+                //console.log("mtd: ",method);
                 //console.log("Path: ",req.path);
                 //console.log("Params: ", req.parameters);
 
@@ -189,3 +190,8 @@ module.exports = function (app, resource) {
 
 
 };
+
+
+
+
+

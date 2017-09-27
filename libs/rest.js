@@ -7,14 +7,7 @@ module.exports = function (modelName) {
 
 
     return {
-        subscribe: function (req, res) {
-            global[modelName].subscribe(req);
-            res.json({message:'Subuscribed successfully'});
-        },
-        unsubscribe: function (req, res) {
-            global[modelName].unsubscribe(req);
-            res.json({message:'Unsubuscribed successfully'});
-        },
+
         find: function (req, res) {
 
             global[modelName].find(req.parameters, function (err, rows) {

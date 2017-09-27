@@ -61,7 +61,7 @@ module.exports = function (resource) {
                     funcs = utils.functions(controla);
 
                     if (resource.config.controllers.rest) {
-                        ['create', 'update', 'destroy', 'find', 'counts', 'streampix', 'uploadpix', 'xexcel', 'unlink', 'spinx', 'croppix','appresources'].forEach(function (restac) {
+                        ['create', 'update', 'destroy', 'find', 'counts', 'streampix', 'uploadpix', 'xexcel', 'unlink', 'spinx', 'croppix'].forEach(function (restac) {
                             funcs = utils.without(funcs, restac);
                         })
                     }
@@ -98,7 +98,6 @@ module.exports = function (resource) {
                     restRoutes['post /' + key.toLowerCase()] = 'create';
                     restRoutes['put /' + key.toLowerCase() + '/:id'] = 'update';
                     restRoutes['delete /' + key.toLowerCase() + '/:id'] = 'destroy';
-                    restRoutes['get /' + key.toLowerCase() + '/appresources'] = 'appresources';
                     restRoutes['post /' + key.toLowerCase() + '/streampix'] = 'streampix';
                     restRoutes['post /' + key.toLowerCase() + '/uploadpix'] = 'uploadpix';
                     restRoutes['post /' + key.toLowerCase() + '/xexcel'] = 'xexcel';

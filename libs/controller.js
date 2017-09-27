@@ -1,30 +1,16 @@
 /**
  * Created by steve Samson <stevee.samson@gmail.com> on 2/5/14.
  */
-var svgCaptcha = require('svg-captcha'),
-    gm = require('gm');
+//var module.filename.slice(__filename.lastIndexOf('/')+1, module.filename.length -3);
+var svgCaptcha = require('svg-captcha');
 module.exports = {
 
-    index: function (req, res) {
-        res.sendStatus(200);
-    },
-    appresources:function(req, res){
-
-        var load = req.parameters;
-        if(load.name){
-            return res.status(200).json(utils.filter(appResources, function(r){ return r.name === load.name;}));
-        }
-
-        if(load.search){
-            return res.status(200).json(utils.filter(appResources, function(r){ return r.name.toLowerCase().indexOf(load.search.toLowerCase()) !== -1;}));
-        }
-
-
-        res.status(200).json(appResources);
-    },
+    //index: function (req, res) {
+    //    res.sendStatus(200);
+    //},
     xexcel: function (req, res) {
 
-        var file_name = "nhiscoopers_" + req.parameters['filename'];
+        var file_name = "Konvaj_" + req.parameters['filename'];
         res.setHeader("Content-Type", "application/vnd.ms-excel");
         res.setHeader("Content-Disposition", "attachment; filename=" + file_name + ".xls");
         res.setHeader("Pragma", "no-cache");
@@ -34,22 +20,21 @@ module.exports = {
     streampix: function (req, res) {
 
         SlicksDecoder.writeStreamTo(req, {save_as: PUBLIC_DIR + '/uploads/' + req.parameters.save_as + '.jpg'}, function (done) {
-            res.json(done);
+            res.status(200).json(done);
         });
     },
     croppix: function (req, res) {
 
-
         var params = req.parameters,
-            //gm = require('gm'),
+            gm = require('gm'),
             path = PUBLIC_DIR + params.src;
-        //console.log(path);
+//        console.log(path);
         gm(path).crop(params.w, params.h, params.x, params.y).write(path, function (e) {
             if (e) {
-                res.json({error: 'Error while cropping -\'' + params.src + '\' ' + e.message});
+                res.status(200).json({error: "Error while cropping -'" + params.src + "' " + e.message});
 
             } else {
-                res.json({text: 'Picture cropped successfully.', src: params.src});
+                res.status(200).json({text: 'Picture cropped successfully.', src: params.src});
             }
         });
     },
@@ -62,7 +47,7 @@ module.exports = {
             captcha = svgCaptcha.create(capOpts);
         captcha.data = encodeURIComponent(captcha.data);
         //console.log(captcha);
-        res.json(captcha);
+        res.status(200).json(captcha);
     },
     unlink: function (req, res) {
         var attachments = req.parameters.attachments,
@@ -74,9 +59,9 @@ module.exports = {
 
             if (attachments.length > 1) {
 
-                attachments.forEach(function (attachement) {
+                attachments.forEach(function (image) {
 
-                    var _path = PUBLIC_DIR + attachement;
+                    var _path = PUBLIC_DIR + image;
                     try {
                         fs.unlinkSync(_path);
                     } catch (e) {
@@ -84,25 +69,24 @@ module.exports = {
                     }
                 });
 
-                res.json({text: 'Attachment successfully deleted.'});
+                res.status(200).json({text: 'Attachments successfully deletes'});
 
             } else {
                 var _path = PUBLIC_DIR + attachments[0];
                 fs.unlink(_path, function (e) {
                     if (e) {
-                        res.json({error: e.toString()});
+                        res.status(200).json({error: e.toString()});
                         return;
                     }
-                    res.json({text: path.basename(_path) + ' successfully deleted!'});
+                    res.status(200).json({text: path.basename(_path) + ' successfully deleted!'});
                 });
             }
 
         } else {
-            res.json({error: 'There are no attachments'});
+            res.status(200).json({error: 'There are no attachments'});
         }
 
     },
-
     uploadpix: function (req, res) {
 
         SlicksDecoder.writeFileTo(req, {
@@ -112,7 +96,7 @@ module.exports = {
 
 
             if (done.error || req.parameters.w === undefined || !req.parameters.w) {
-                res.json(done);
+                res.status(200).json(done);
                 return;
             }
 
@@ -123,13 +107,13 @@ module.exports = {
 
             //console.log('CORDS: ', coords);
             //if (done.error) {
-            //    res.json(done);
+            //    res.status(200).json(done);
             //    return;
             //}
             gm(path).size(function (e, size) {
 
                 if (e) {
-                    res.json({error: 'Error while getting image size -\'' + done.src + '\' ' + e.message});
+                    res.status(200).json({error: "Error while getting image size -'" + done.src + "' " + e.message});
                     return;
                 }
                 var sw = parseInt(size.width),
@@ -138,9 +122,9 @@ module.exports = {
 
                         gm(path).resize(w, h).write(path, function (e) {
                             if (e) {
-                                res.json({error: 'Error while resize -\'' + done.src + '\' ' + e.message});
+                                res.status(200).json({error: "Error while resizing -'" + done.src + "' " + e.message});
                             } else {
-                                res.json(done);
+                                res.status(200).json(done);
                             }
                         });
                     };
@@ -149,7 +133,7 @@ module.exports = {
                     var fs = require('fs');
                     fs.unlink(path, function (e) {
                     });
-                    res.json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
+                    res.status(200).json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
                     //} else if (sw > coords.w) {
                 } else {
                     resizeImage(coords.w, coords.h);
