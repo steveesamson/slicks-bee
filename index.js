@@ -4,10 +4,7 @@
 module.exports = function (base) {
 
 
-    var stud = require('stud'),
-        fs = require('fs'),
-        path = require('path'),
-        net = require('net'),
+    var net = require('net'),
         io = require('socket.io'),
         sio_redis = require('socket.io-redis'),
         farmhash = require('farmhash'),
@@ -32,9 +29,6 @@ module.exports = function (base) {
 
 
             if (cluster.isMaster) {
-
-
-                var assetVersion = (new Date()).getTime();
                 // This stores our workers. We need to keep them to be able to reference
                 // them based on source IP address. It's also useful for auto-restart,
                 // for example.
@@ -46,11 +40,15 @@ module.exports = function (base) {
 
                     // Optional: Restart worker on exit
                     workers[i].on('exit', function(code, signal) {
-                        console.log('Re-spawning worker', i);
+                        console.log('respawning worker', i);
                         spawn(i);
                     });
                 };
 
+                // Spawn workers.
+                for (var i = 0; i < count; i++) {
+                    spawn(i);
+                }
 
                 // Helper function for getting a worker index based on IP address.
                 // This is a hot path so it should be really fast. The way it works
@@ -62,43 +60,20 @@ module.exports = function (base) {
                 // worker index distribution only much faster.
                 var worker_index = function(ip, len) {
 
-                    return farmhash.fingerprint32(ip) % len; // Farmhash is the fastest and works with IPv6, too
+                    return farmhash.fingerprint32(''+ip[i]) % len; // Farmhash is the fastest and works with IPv6, too
                 };
 
-                stud.__express(path.join(VIEW_DIR, 'index.stud'),{year: DateTime('yyyy'), script:'/js/a_.js?v=' + assetVersion, style:'/css/a_.css?v=' + assetVersion},function(e, renderedString){
+                // Create the outside facing server listening on our port.
+                var server = net.createServer({ pauseOnConnect: true }, function(connection) {
+                    // We received a connection and need to pass it to the appropriate
+                    // worker. Get the worker for this connection's source IP and pass
+                    // it the connection.
+                    var worker = workers[worker_index(connection.remoteAddress, count)];
 
-                    var f = path.join(PUBLIC_DIR, 'index.html');
-
-                    fs.writeFile(f, renderedString, function (err) {
-                        if (err) {
-
-                            return console.log(err);
-                        }
-                        console.log('File ' + f + ' written.');
-
-                        // Spawn workers.
-                        for (var i = 0; i < count; i++) {
-                            spawn(i);
-                        }
+                    worker.send('sticky-session:connection', connection);
 
 
-                        // Create the outside facing server listening on our port.
-                        var server = net.createServer({ pauseOnConnect: true }, function(connection) {
-                            // We received a connection and need to pass it to the appropriate
-                            // worker. Get the worker for this connection's source IP and pass
-                            // it the connection.
-                            var worker = workers[worker_index(connection.remoteAddress, count)];
-
-                            worker.send('sticky-session:connection', connection);
-
-
-                        }).listen(port);
-
-
-                    });
-
-                });
-
+                }).listen(port);
 
             } else {
                 // Note we don't use a port here because the master listens on it for us.
@@ -145,5 +120,3 @@ module.exports = function (base) {
     }
 
 };
-
-

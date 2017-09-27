@@ -71,9 +71,9 @@ module.exports = function (model) {
                     var type = self.attributes[attr].toLowerCase();
 
                     if(type === 'string'  && value && (value + '').startsWith(skipCleanKey) ){
-                            value = value.substring(2);
-                            options[attr] = value;
-                            continue;
+                        value = value.substring(2);
+                        options[attr] = value;
+                        continue;
                     }
 
                     options[attr] = SMClean[type](options[attr]);

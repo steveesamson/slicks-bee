@@ -170,9 +170,9 @@ module.exports = function (app, resource) {
                 req.url = req.path;
 
 
-                //console.log("mtd: ",method);
-                //console.log("Path: ",req.path);
-                //console.log("Params: ", req.parameters);
+                console.log("mtd: ",method);
+                console.log("Path: ",req.path);
+                console.log("Params: ", req.parameters);
 
 
 
@@ -190,8 +190,4 @@ module.exports = function (app, resource) {
 
 
 };
-
-
-
-
 

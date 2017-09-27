@@ -164,30 +164,30 @@ var loadPolicies = function (_policies) {
 
         var policies = [];
 
-       for(var i=0; i < _policies.length; ++i){
+        for(var i=0; i < _policies.length; ++i){
 
-           var poly = _policies[i].trim();
-           if (poly === 'denyAll') {
-               policies.push(denyAll);
-               break;
-           }
-           if (poly === 'allowAll') {
-               policies.push(allowAll);
-               break;
-           }
-           var fullpath = path.join(policies_path, poly),
-               exists = fs.existsSync(fullpath + '.js');
-           if (exists) {
+            var poly = _policies[i].trim();
+            if (poly === 'denyAll') {
+                policies.push(denyAll);
+                break;
+            }
+            if (poly === 'allowAll') {
+                policies.push(allowAll);
+                break;
+            }
+            var fullpath = path.join(policies_path, poly),
+                exists = fs.existsSync(fullpath + '.js');
+            if (exists) {
 
-               var policy = require(fullpath);
+                var policy = require(fullpath);
 
-               policies.push(policy);
+                policies.push(policy);
 
-           } else {
-               console.warn('Policy definition for: ' + poly + ' is undefined');
-           }
+            } else {
+                console.warn('Policy definition for: ' + poly + ' is undefined');
+            }
 
-       }
+        }
 
         return policies;
 
