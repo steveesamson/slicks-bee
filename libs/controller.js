@@ -51,6 +51,7 @@ module.exports = {
     },
     unlink: function (req, res) {
         var attachments = req.parameters.attachments,
+            modelName = req.parameters.store
             path = require('path'),
             fs = require('fs');
         if (attachments) {
@@ -61,7 +62,7 @@ module.exports = {
 
                 attachments.forEach(function (image) {
 
-                    var _path = PUBLIC_DIR + image;
+                    var _path = path.join(PUBLIC_DIR, 'uploads',store, image);
                     try {
                         fs.unlinkSync(_path);
                     } catch (e) {
@@ -72,7 +73,7 @@ module.exports = {
                 res.status(200).json({text: 'Attachments successfully deletes'});
 
             } else {
-                var _path = PUBLIC_DIR + attachments[0];
+                var _path = path.join(PUBLIC_DIR, 'uploads',store, attachments[0]);
                 fs.unlink(_path, function (e) {
                     if (e) {
                         res.status(200).json({error: e.toString()});
