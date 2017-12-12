@@ -51,7 +51,7 @@ module.exports = {
     },
     unlink: function (req, res) {
         var attachments = req.parameters.attachments,
-            modelName = req.parameters.store
+            store = req.parameters.store
             path = require('path'),
             fs = require('fs');
         if (attachments) {
