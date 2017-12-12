@@ -66,7 +66,7 @@ module.exports = function (model) {
             var self = this;
             for (var attr in this.attributes) {
 
-                if (attr in options && !(attr in self.verbatims)) {
+                if (attr in options) {
                     var value = options[attr];
 
                     var type = self.attributes[attr].toLowerCase();
@@ -76,6 +76,8 @@ module.exports = function (model) {
                     //     options[attr] = value;
                     //     continue;
                     // }
+
+                    if(self.verbatims.indexOf(attr) !== -1) continue;
 
                     options[attr] = SMClean[type](options[attr]);
                 }
