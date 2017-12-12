@@ -27,6 +27,7 @@ module.exports = function (model) {
         defaultDateValues: false, //{'withdrawn_date':''yyyy-mm-dd'}
         checkConcurrentUpdate: false,//'lastupdated'
         joinSearch: [],//['users.user_id'] includes joins in searches.
+        verbatims: [],//['attachments'] excludes from mclean.
         subscribe: function (req) {
             req.io.join(this.instanceName);
             console.log('Subscribed to %s', modelName);
@@ -65,16 +66,16 @@ module.exports = function (model) {
             var self = this;
             for (var attr in this.attributes) {
 
-                if (attr in options) {
+                if (attr in options && !(attr in self.verbatims)) {
                     var value = options[attr];
 
                     var type = self.attributes[attr].toLowerCase();
 
-                    if(type === 'string'  && value && (value + '').startsWith(skipCleanKey) ){
-                        value = value.substring(2);
-                        options[attr] = value;
-                        continue;
-                    }
+                    // if(type === 'string'  && value && (value + '').startsWith(skipCleanKey) ){
+                    //     value = value.substring(2);
+                    //     options[attr] = value;
+                    //     continue;
+                    // }
 
                     options[attr] = SMClean[type](options[attr]);
                 }
