@@ -88,6 +88,52 @@ module.exports = {
         }
 
     },
+    resizeimage:function(req, res){
+
+        if (!req.parameters.h || !req.parameters.w) {
+            return res.status(200).json({error:'Provide height,h and width,w please.'});
+        }
+
+        if(!req.parameters.src){
+            return res.status(200).json({error:'No image source provided, src'});
+        }
+
+        let src = req.parameters.src;
+        
+        var coords = {w: parseInt(req.parameters.w), h: parseInt(req.parameters.h)},
+            gm = require('gm'),
+            path = PUBLIC_DIR + src;
+
+        gm(path).size(function (e, size) {
+
+            if (e) {
+                res.status(200).json({error: "Error while getting image size -'" + src + "' " + e.message});
+                return;
+            }
+            var sw = parseInt(size.width),
+                sh = parseInt(size.height),
+                resizeImage = function (w, h) {
+
+                    gm(path).resize(w, h).write(path, function (e) {
+                        if (e) {
+                            res.status(200).json({error: "Error while resizing -'" + src + "' " + e.message});
+                        } else {
+                            res.status(200).json({text: 'Picture uploaded successfully.', 'src': src});
+                        }
+                    });
+                };
+
+            if (sw < coords.w || sh < coords.h) {
+                var fs = require('fs');
+                fs.unlink(path, function (e) {
+                });
+                res.status(200).json({error: "Sorry, picture -'" + src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
+            } else {
+                resizeImage(coords.w, coords.h);
+            }
+        });
+
+    },
     uploadpix: function (req, res) {
 
         SlicksDecoder.writeFileTo(req, {
@@ -96,50 +142,7 @@ module.exports = {
         }, function (done) {
 
 
-            if (done.error || req.parameters.w === undefined || !req.parameters.w) {
-                res.status(200).json(done);
-                return;
-            }
-
-
-            var coords = {w: parseInt(req.parameters.w), h: parseInt(req.parameters.h)},
-                gm = require('gm'),
-                path = PUBLIC_DIR + done.src;
-
-            //console.log('CORDS: ', coords);
-            //if (done.error) {
-            //    res.status(200).json(done);
-            //    return;
-            //}
-            gm(path).size(function (e, size) {
-
-                if (e) {
-                    res.status(200).json({error: "Error while getting image size -'" + done.src + "' " + e.message});
-                    return;
-                }
-                var sw = parseInt(size.width),
-                    sh = parseInt(size.height),
-                    resizeImage = function (w, h) {
-
-                        gm(path).resize(w, h).write(path, function (e) {
-                            if (e) {
-                                res.status(200).json({error: "Error while resizing -'" + done.src + "' " + e.message});
-                            } else {
-                                res.status(200).json(done);
-                            }
-                        });
-                    };
-
-                if (sw < coords.w || sh < coords.h) {
-                    var fs = require('fs');
-                    fs.unlink(path, function (e) {
-                    });
-                    res.status(200).json({error: "Sorry, picture -'" + done.src + "' must be at least " + coords.w + "x" + coords.h + " in dimension."});
-                    //} else if (sw > coords.w) {
-                } else {
-                    resizeImage(coords.w, coords.h);
-                }
-            });
+            res.status(200).json(done);
 
         });
     }

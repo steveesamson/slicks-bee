@@ -101,6 +101,10 @@ module.exports = function (modelName) {
 
             });
         },
+        __fields: function(req, res){
+            res.status(200).json(global[modelName].attributes);
+        },
+
         counts:function(req, res)
         {
             global[modelName].counts(req.parameters, function (err, rows) {

@@ -48,7 +48,7 @@ module.exports = function (base) {
         var names = str.split('_');
         var new_name = '';
         names.forEach(function (s) {
-            new_name += new_name.length > 0 ? " " + $.makeName(s) : $.makeName(s);
+            new_name += new_name.length > 0 ? " " + makeName(s) : makeName(s);
         });
 
         return new_name;
@@ -76,7 +76,7 @@ module.exports = function (base) {
 
     fs.readdirSync(models_path).forEach(function (model_name) {
         var base_name = path.basename(model_name, '.js');
-        appResources.push({name: base_name});
+        appResources.push({name: makeName(base_name), value:base_name.toLowerCase()});
         models[base_name] = require(path.join(models_path, model_name));
 
     });

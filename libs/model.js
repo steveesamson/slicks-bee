@@ -160,10 +160,6 @@ module.exports = function (model) {
 
             var self = this;
             this.sanitizeParams(options);
-            if (options['ROW_COUNT']) {
-                this.counts(options, cb);
-                return;
-            }
 
             for (var attr in this.attributes) {
                 if (attr in options) {
@@ -186,7 +182,9 @@ module.exports = function (model) {
                 } else  this.db.orderBy(modelName + '.id', 'ASC');
             }
 
-
+            if (options['ROW_COUNT']) {
+                return this.rowCount(this.db.compile(), options, cb);
+            }
             this.db.fetch(modelName, function (err, rows) {
 
                 self.prepareResult(err, rows, options, cb);
@@ -262,10 +260,6 @@ module.exports = function (model) {
                 return;
             }
 
-            //if (this.checkConcurrentUpdate) {
-            //    this.db.where(this.checkConcurrentUpdate, options[this.checkConcurrentUpdate]);
-            //    delete options[this.checkConcurrentUpdate];
-            //}
 
             if (this.checkConcurrentUpdate) {
 
