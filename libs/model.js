@@ -183,7 +183,7 @@ module.exports = function (model) {
             }
 
             if (options['ROW_COUNT']) {
-                return this.rowCount(this.db.compile(), options, cb);
+                return this.rowCount(this.db.compile(modelName), options, cb);
             }
             this.db.fetch(modelName, function (err, rows) {
 
