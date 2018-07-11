@@ -22,6 +22,7 @@ module.exports = function (base) {
         start = function () {
 
 
+            global['SlickSources'] = databases;
             config.configureModel(databases);
             config.configureController();
             config.configureRoute();

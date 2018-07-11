@@ -17,6 +17,7 @@ module.exports = function (req, res, next) {
         tok['x-csrf-token'] = req.headers['x-csrf-token'];
     }
     req.parameters = utils.extend({}, tok, req.query, req.body);
+    // console.log("AJAX x-token: ", req.parameters['x-csrf-token']);
     next();
 };
 

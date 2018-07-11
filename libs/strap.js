@@ -21,12 +21,10 @@ module.exports = function (app, resource) {
         'delete': {},
         put: {}
     };
-    //var router = express.Router();
     /*
      Bind middlewares;
      */
     if (resource.middlewares) {
-
         app.all('*', resource.middlewares);
         //for(var i=0;i<resource.middlewares.length; ++i){
         //    router.use(resource.middlewares[i]);
@@ -34,7 +32,6 @@ module.exports = function (app, resource) {
     }
     var globalPolicy = resource.policies.global;
 
-    //console.log('RTS:', resource.routes);
 
     /*
      bind / route first
@@ -45,13 +42,10 @@ module.exports = function (app, resource) {
             myPolicy = resource.policies['Index'],
             myGlobalPolicy = myPolicy && myPolicy['global'];
 
-
-
-
         for (var path in route) {
             var handler_name = route[path],
                 normalized = resource.normalizePath(path),
-                policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
+                policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []))) : (globalPolicy ? globalPolicy : []);
 
             app[normalized.method](normalized.path, policy, controller[handler_name]);
 
@@ -76,29 +70,35 @@ module.exports = function (app, resource) {
         for (var path in route) {
             var handler_name = route[path],
                 normalized = resource.normalizePath(path),
-                policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []) )) : (globalPolicy ? globalPolicy : []);
-            //console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
-            app[normalized.method](normalized.path, policy, controller[handler_name]);
-            //ioRoutes[normalized.method][normalized.path] = {policy:policy,handler:controller[handler_name]};
+                policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []))) : (globalPolicy ? globalPolicy : []);
 
-            ioRoutes[normalized.method][normalized.path] = (function (_policy, _handler) {
+            policy.push(resource.slicksTenancy); //Added
+            // console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
+            if (controller[handler_name]) {
+                app[normalized.method](normalized.path, policy, controller[handler_name]);
+                //ioRoutes[normalized.method][normalized.path] = {policy:policy,handler:controller[handler_name]};
 
-                return function (req, res) {
+                ioRoutes[normalized.method][normalized.path] = (function (_policy, _handler) {
 
-                    var _policies = copyArray(_policy),
-                        next = function () {
-                            _policies.length && _policies.shift()(req, res, next);
-                        };
+                    return function (req, res) {
 
-                    _policies.push(_handler);
+                        var _policies = copyArray(_policy),
+                            next = function () {
+                                _policies.length && _policies.shift()(req, res, next);
+                            };
 
-                    //console.log('Polices: ', _policies.toString());
+                        _policies.push(_handler);
 
-                    next();
+                        //console.log('Polices: ', _policies.toString());
 
-                }
+                        next();
 
-            })(policy, controller[handler_name]);
+                    }
+
+                })(policy, controller[handler_name]);
+            }else{
+                console.error('Handler: ' + handler_name + ' not found on for path: ' + normalized.path + ' on method: ' + normalized.method);
+            }
         }
 
     }
@@ -117,7 +117,10 @@ module.exports = function (app, resource) {
                 ws.destroySoon();
                 ws.on('close', function () {
                     dest = dest.replace(PUBLIC_DIR, '');
-                    cb && cb({text: 'Web capture was successful.', src: dest});
+                    cb && cb({
+                        text: 'Web capture was successful.',
+                        src: dest
+                    });
                 });
             });
         },
@@ -128,11 +131,16 @@ module.exports = function (app, resource) {
             file.renameTo(dest, function (e) {
                 if (e) {
 
-                    cb && cb({errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message});
+                    cb && cb({
+                        errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message
+                    });
 
                 } else {
                     dest = dest.replace(PUBLIC_DIR, '');
-                    cb && cb({text: 'Picture uploaded successfully.', src: dest});
+                    cb && cb({
+                        text: 'Picture uploaded successfully.',
+                        src: dest
+                    });
                 }
             });
 
@@ -170,11 +178,12 @@ module.exports = function (app, resource) {
                 req.url = req.path;
 
 
-                console.log("mtd: ",method);
-                console.log("Path: ",req.path);
-                console.log("Params: ", req.parameters);
+                // console.log("mtd: ",method);
+                // console.log("Path: ",req.path);
+                // console.log("Params: ", req.parameters);
+                // console.log("IO x-token: ", req.parameters['x-csrf-token']);
 
-
+                // req.db = 'io-tenant';
 
                 //ioRoutes[method][req.path]['handler'](req, res);
                 ioRoutes[method][req.path](req, res);
@@ -190,4 +199,3 @@ module.exports = function (app, resource) {
 
 
 };
-

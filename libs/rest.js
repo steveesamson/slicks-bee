@@ -10,13 +10,33 @@ module.exports = function (modelName) {
 
         find: function (req, res) {
 
-            global[modelName].find(req.parameters, function (err, rows) {
+            console.log('Params: ', req.parameters, ' Tenant: ', req.db !== null);
+            
+            let model = Models[modelName](req);
+            console.log(' Tenant Model: ', model);
+            model.find(req.parameters, function (err, rows) {
 
                 if (err) {
                     res.status(200).json({error: err.message});
                 } else {
                     if(rows){
+
+                        // if(req.parameters.publish_create || req.parameters.publish_fetch){
+                        //     global[modelName].publishCreate(req, rows);
+                        //     return req.parameters.publish_create?  res.status(200).json([]) : res.status(200).json(rows);
+                        // }
+
+                        // if(req.parameters.publish_delete){
+                        //     global[modelName].publishDestroy(req, rows);
+                        //     return res.status(200).json([]);
+                        // }
+                        // if(req.parameters.publish_update || req.parameters.publish_fetch_update){
+                        //     global[modelName].publishUpdate(req, rows);
+                        //     return req.parameters.publish_update?  res.status(200).json([]) : res.status(200).json(rows);
+                        // }
+                        
                         res.status(200).json(rows);
+
                     }else{
                         res.status(200).json({error:'Record not found!'});
                     }
@@ -26,21 +46,21 @@ module.exports = function (modelName) {
         create: function (req, res) {
 
             var load = req.parameters;
-
-            global[modelName].create(load, function (err, result) {
+            let model = Models[modelName](req);
+            model.create(load, function (err, result) {
                 if (err) {
                     res.status(200).json({error: err.message});
 
                 }
                 else {
 
-                    global[modelName].find(result, function (err, row) {
+                    model.find(result, function (err, row) {
 
                         if (err) {
                             res.status(200).json({error: err.message});
                         } else {
 
-                            global[modelName].publishCreate(req, row);
+                            model.publishCreate(req, row);
                             res.status(200).json(row);
                         }
                     })
@@ -52,7 +72,8 @@ module.exports = function (modelName) {
         },
         destroy: function (req, res) {
             var arg = req.parameters;
-            global[modelName].destroy(arg, function (err, result) {
+            let model = Models[modelName](req);
+            model.destroy(arg, function (err, result) {
                 if (err) {
                     res.status(200).json({error: err.message});
 
@@ -60,8 +81,8 @@ module.exports = function (modelName) {
 
                     if (parseInt(result.affectedRows)) {
                         var load = {id: arg.id};
-                        global[modelName].publishDestroy(req, load);
-                        res.status(200).json(result);
+                        model.publishDestroy(req, load);
+                        res.status(200).json(load);
                     }else{
                         res.status(200).json({error:'Delete was not successful, probably this record has been updated since your last fetch'});
                     }
@@ -74,20 +95,20 @@ module.exports = function (modelName) {
         update: function (req, res) {
 
             var arg = req.parameters;
-
-            global[modelName].update(arg, function (err, result) {
+            let model = Models[modelName](req);
+            model.update(arg, function (err, result) {
                 if (err) {
                     res.status(200).json({error: err.message});
                 } else {
 
                     if (parseInt(result.affectedRows)) {
 
-                        global[modelName].find({id:arg.id}, function (err, row) {
+                        model.find({id:arg.id}, function (err, row) {
 
                             if (err) {
                                 res.status(200).json({error: err.message});
                             } else {
-                                global[modelName].publishUpdate(req, row);
+                                model.publishUpdate(req, row);
                                 res.status(200).json(row);
                             }
                         });
@@ -102,20 +123,21 @@ module.exports = function (modelName) {
             });
         },
         __fields: function(req, res){
-            res.status(200).json(global[modelName].attributes);
+            let model = Models[modelName](req);
+            res.status(200).json(model.attributes);
         },
 
-        counts:function(req, res)
-        {
-            global[modelName].counts(req.parameters, function (err, rows) {
+        // counts:function(req, res)
+        // {
+        //     global[modelName].counts(req.parameters, function (err, rows) {
 
-                if (err) {
-                    res.status(200).json({error: err.message});
-                } else {
-                    res.status(200).json(rows);
-                }
-            })
-        }
+        //         if (err) {
+        //             res.status(200).json({error: err.message});
+        //         } else {
+        //             res.status(200).json(rows);
+        //         }
+        //     })
+        // }
 
     };
 

@@ -4,7 +4,6 @@
 
 module.exports = function (model) {
     var modelName = model.toLocaleLowerCase(),
-        skipCleanKey = '~|',
         SMClean = require('smclean');
 
     SMClean.double = SMClean.float;
@@ -25,9 +24,10 @@ module.exports = function (model) {
         attributes: {},
         uniqueKeys: ['id', 'SUM', 'ROW_COUNT'],
         defaultDateValues: false, //{'withdrawn_date':''yyyy-mm-dd'}
-        checkConcurrentUpdate: false,//'lastupdated'
-        joinSearch: [],//['users.user_id'] includes joins in searches.
-        verbatims: [],//['attachments'] excludes from mclean.
+        checkConcurrentUpdate: false, //'lastupdated'
+        joinSearch: [], //['users.user_id'] includes joins in searches.
+        verbatims: [], //['attachments'] excludes from mclean.
+        searchPath: [], //['attachments'] excludes from mclean.
         subscribe: function (req) {
             req.io.join(this.instanceName);
             console.log('Subscribed to %s', modelName);
@@ -37,31 +37,43 @@ module.exports = function (model) {
             console.log('Unsubscribed to %s', modelName);
         },
         publishCreate: function (req, load) {
-//            slickIO.room(this.instanceName).broadcast('created', {message: load});
+            //            slickIO.room(this.instanceName).broadcast('created', {message: load});
             if (req.io) {
 
-                var pload = {verb: 'create', room: modelName, data: load};
+                var pload = {
+                    verb: 'create',
+                    room: modelName,
+                    data: load
+                };
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
         },
         publishUpdate: function (req, load) {
-//            slickIO.room(this.instanceName).broadcast('updated', {message: load});
+            //            slickIO.room(this.instanceName).broadcast('updated', {message: load});
             if (req.io) {
-                var pload = {verb: 'update', data: load, room: modelName};
+                var pload = {
+                    verb: 'update',
+                    data: load,
+                    room: modelName
+                };
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishUpdate to %s', modelName);
             }
         },
         publishDestroy: function (req, load) {
-//            slickIO.room(this.instanceName).broadcast('destroyed', {message: load});
+            //            slickIO.room(this.instanceName).broadcast('destroyed', {message: load});
             if (req.io) {
-                var pload = {data: load, verb: 'destroy', room: modelName};
+                var pload = {
+                    data: load,
+                    verb: 'destroy',
+                    room: modelName
+                };
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
             }
         },
-        sanitizeParams:function(options){
+        sanitizeParams: function (options) {
 
             var self = this;
             for (var attr in this.attributes) {
@@ -71,41 +83,31 @@ module.exports = function (model) {
 
                     var type = self.attributes[attr].toLowerCase();
 
-                    // if(type === 'string'  && value && (value + '').startsWith(skipCleanKey) ){
-                    //     value = value.substring(2);
-                    //     options[attr] = value;
-                    //     continue;
-                    // }
-
-                    if(self.verbatims.indexOf(attr) !== -1) continue;
+                    if (self.verbatims.indexOf(attr) !== -1) continue;
 
                     options[attr] = SMClean[type](options[attr]);
                 }
             }
         },
-        search: function (searchString) {
+        search: function (searchString, searchPath) {
             var self = this,
                 params = '';
 
             if (searchString.length) {
                 params = searchString.split(/\s/);
-                var attrCopy = utils.clone(self.attributes);
+                var attrCopy = searchPath || self.searchPath.slice(0, self.searchPath.length);
                 if (self.joinSearch && self.joinSearch.length) {
                     self.joinSearch.forEach(function (f) {
-                        attrCopy[f] = 'string';
+                        attrCopy.push(f);
                     });
                 }
                 params.forEach(function (pa) {
-                    var index = 0;
-                    for (var attr in attrCopy) {
-                        if (attrCopy[attr] === 'string') {
-                            if (index === 0) {
-                                self.db.like(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
-                            } else {
-//                                self.db.orLike(modelName + '.' + attr, pa, 'both');
-                                self.db.orLike(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
-                            }
-                            ++index;
+                    for (var index = 0; index < attrCopy.length; ++index) {
+                        var attr = attrCopy[index];
+                        if (index === 0) {
+                            self.db.like(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
+                        } else {
+                            self.db.orLike(attr.indexOf('.') == -1 ? (modelName + '.' + attr) : attr, pa, 'both');
                         }
                     }
 
@@ -179,7 +181,7 @@ module.exports = function (model) {
                     var direction = self.orderDirection || 'ASC';
                     this.db.orderBy(modelName + '.' + self.orderBy, direction);
 
-                } else  this.db.orderBy(modelName + '.id', 'ASC');
+                } else this.db.orderBy(modelName + '.id', 'ASC');
             }
 
             if (options['ROW_COUNT']) {
@@ -265,7 +267,7 @@ module.exports = function (model) {
 
                 this.db.where(this.checkConcurrentUpdate, options[this.checkConcurrentUpdate]);
 
-                this.db.set(this.checkConcurrentUpdate, parseInt(options[this.checkConcurrentUpdate]) +  1);
+                this.db.set(this.checkConcurrentUpdate, parseInt(options[this.checkConcurrentUpdate]) + 1);
 
                 delete options[this.checkConcurrentUpdate];
             }

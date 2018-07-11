@@ -133,6 +133,7 @@ module.exports = function (base) {
     };
 
     global.appResources = appResources;
+    global.isMultitenant = (app_config.multitenant === true);
     return {
         models: models,
         controllers: controllers,
@@ -151,6 +152,7 @@ module.exports = function (base) {
         loadPolicies: loadPolicies,
         slickRouter: require('./restRouter'),
         slicksMultiparts: require('./slicks-multiparts'),
+        slicksTenancy: require('./slicks-tenancy'),
         decorateReq: decorateReq
 
     };

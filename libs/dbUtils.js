@@ -23,8 +23,9 @@ module.exports = function (databases, resource) {
 
                 console.log('Connected to ' + cfg.item + ' db.');
 
-                var key = (cfg.item === 'default') ? 'db' : cfg.item;
-                databases[key] = db;
+                // var key = (cfg.item === 'default') ? 'db' : cfg.item;
+                // var key =  cfg.item;
+                databases[cfg.item] = db;
                 cfg = du.nextItem(cfg.options);
                 (cb && cb((cfg.item ? cfg : false), oc));
 

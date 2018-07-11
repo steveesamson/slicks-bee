@@ -7,6 +7,7 @@ var baseModel = require('./model'),
 	indexController = require('./IndexController');
 
 module.exports = function(resource) {
+	global.Models = {};
 	return {
 		configureModel: function(databases) {
 			var models = resource.models;
@@ -15,9 +16,24 @@ module.exports = function(resource) {
 					bkeys = baseModel(m)['uniqueKeys'],
 					ckeys = models[m]['uniqueKeys'] || [];
 
-				var model = utils.extend(dbcopy, baseModel(m), models[m]);
+				// var model = utils.extend(dbcopy, baseModel(m), models[m]);
+				var model = utils.extend(baseModel(m), models[m]);
 				model['uniqueKeys'] = utils.union(bkeys, ckeys);
-				global[m] = model;
+				// global[m] = model;
+				global.Models[m] = (function(mdl){
+
+					return function(req){
+						if(!req || !req.db){
+							console.error('Null db object, check all your database connections...');
+						}
+						let copy = utils.clone(mdl);
+						copy['db'] = req.db;
+						return copy;
+					}
+
+
+				})(model);
+
 			}
 
 			resource.models = models;
@@ -60,7 +76,7 @@ module.exports = function(resource) {
 							'update',
 							'destroy',
 							'find',
-							'counts',
+							// 'counts',
 							'streampix',
 							'uploadpix',
 							'xexcel',
@@ -94,7 +110,7 @@ module.exports = function(resource) {
 					restRoutes['get /' + key.toLowerCase()] = 'croppix';
 					restRoutes['get /' + key.toLowerCase() + '/:id'] = 'find';
 					restRoutes['get /' + key.toLowerCase()] = 'find';
-					restRoutes['get /' + key.toLowerCase() + '/counts'] = 'counts';
+					// restRoutes['get /' + key.toLowerCase() + '/counts'] = 'counts';
 					restRoutes['post /' + key.toLowerCase()] = 'create';
 					restRoutes['put /' + key.toLowerCase() + '/:id'] = 'update';
 					restRoutes['delete /' + key.toLowerCase() + '/:id'] = 'destroy';
