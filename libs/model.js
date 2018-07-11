@@ -28,13 +28,14 @@ module.exports = function (model) {
         joinSearch: [], //['users.user_id'] includes joins in searches.
         verbatims: [], //['attachments'] excludes from mclean.
         searchPath: [], //['attachments'] excludes from mclean.
-        subscribe: function (req) {
-            req.io.join(this.instanceName);
-            console.log('Subscribed to %s', modelName);
+        postCreate: function (data) {
+            
         },
-        unsubscribe: function (req) {
-            req.io.leave(this.instanceName);
-            console.log('Unsubscribed to %s', modelName);
+        postUpdate: function (data) {
+
+        },
+        postDestroy: function (data){
+
         },
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
@@ -45,10 +46,12 @@ module.exports = function (model) {
                     room: modelName,
                     data: load
                 };
+                this.postCreate(load);
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
         },
+
         publishUpdate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('updated', {message: load});
             if (req.io) {
@@ -57,6 +60,8 @@ module.exports = function (model) {
                     data: load,
                     room: modelName
                 };
+                this.postUpdate(load);
+
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishUpdate to %s', modelName);
             }
@@ -69,6 +74,7 @@ module.exports = function (model) {
                     verb: 'destroy',
                     room: modelName
                 };
+                this.postDestroy(load);
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
             }

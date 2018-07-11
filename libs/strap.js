@@ -148,7 +148,7 @@ module.exports = function (app, resource) {
         }
     };
 
-
+    global.IO = app.io;
     app.io.sockets.on('connection', function (socket) {
 
         console.log('Connected: ', socket.id);
