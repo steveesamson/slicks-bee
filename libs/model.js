@@ -53,7 +53,6 @@ module.exports = function (model) {
         },
 
         publishUpdate: function (req, load) {
-            //            slickIO.room(this.instanceName).broadcast('updated', {message: load});
             if (req.io) {
                 var pload = {
                     verb: 'update',
