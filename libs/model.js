@@ -31,13 +31,13 @@ module.exports = function (model) {
         joinSearch: [], //['users.user_id'] includes joins in searches.
         verbatims: [], //['attachments'] excludes from mclean.
         searchPath: [], //['attachments'] excludes from mclean.
-        postCreate: function (data) {
+        postCreate: function (req, data) {
             
         },
-        postUpdate: function (data) {
+        postUpdate: function (req, data) {
 
         },
-        postDestroy: function (data){
+        postDestroy: function (req, data){
 
         },
         broadcastUpdate:function(load){
@@ -73,7 +73,7 @@ module.exports = function (model) {
                     room: modelName,
                     data: load
                 };
-                this.postCreate(load);
+                this.postCreate({db:req.db}, load);
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
@@ -86,7 +86,7 @@ module.exports = function (model) {
                     data: load,
                     room: modelName
                 };
-                this.postUpdate(load);
+                this.postUpdate({db:req.db},load);
 
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishUpdate to %s', modelName);
@@ -100,7 +100,7 @@ module.exports = function (model) {
                     verb: 'destroy',
                     room: modelName
                 };
-                this.postDestroy(load);
+                this.postDestroy({db:req.db},load);
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
             }
