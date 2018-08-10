@@ -4,7 +4,10 @@
 
 module.exports = function (model) {
     var modelName = model.toLocaleLowerCase(),
-        SMClean = require('smclean');
+        SMClean = require('smclean'),
+        broadcast = function(load){
+            IO.sockets.emit('comets', load);
+        };
 
     SMClean.double = SMClean.float;
     SMClean.tinyint = function (str) {
@@ -36,6 +39,30 @@ module.exports = function (model) {
         },
         postDestroy: function (data){
 
+        },
+        broadcastUpdate:function(load){
+            var pload = {
+                verb: 'update',
+                room: modelName,
+                data: load
+            };
+            broadcast(pload);
+        },
+        broadcastCreate:function(load){
+            var pload = {
+                verb: 'create',
+                room: modelName,
+                data: load
+            };
+            broadcast(pload);
+        },
+        broadcastDestroy:function(load){
+            var pload = {
+                verb: 'destroy',
+                room: modelName,
+                data: load
+            };
+            broadcast(pload);
         },
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
