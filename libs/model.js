@@ -66,6 +66,7 @@ module.exports = function (model) {
         },
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
+            this.postCreate({db:req.db}, load);
             if (req.io) {
 
                 var pload = {
@@ -73,34 +74,34 @@ module.exports = function (model) {
                     room: modelName,
                     data: load
                 };
-                this.postCreate({db:req.db}, load);
+                
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
         },
 
         publishUpdate: function (req, load) {
+            this.postUpdate({db:req.db},load);
             if (req.io) {
                 var pload = {
                     verb: 'update',
                     data: load,
                     room: modelName
                 };
-                this.postUpdate({db:req.db},load);
-
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishUpdate to %s', modelName);
             }
         },
         publishDestroy: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('destroyed', {message: load});
+            this.postDestroy({db:req.db},load);
             if (req.io) {
                 var pload = {
                     data: load,
                     verb: 'destroy',
                     room: modelName
                 };
-                this.postDestroy({db:req.db},load);
+               
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
             }
