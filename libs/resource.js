@@ -151,10 +151,8 @@ module.exports = function (base) {
         fnIsEqual: fnIsEqual,
         loadPolicies: loadPolicies,
         slickRouter: require('./restRouter'),
-        slicksMultiparts: require('./slicks-multiparts'),
-        slicksTenancy: require('./slicks-tenancy'),
-        decorateReq: decorateReq
-
+        slicksIORouter: require('./ioRouter'),
+        slicksMultiparts: require('./slicks-multiparts')
     };
 
 
@@ -204,46 +202,6 @@ var loadPolicies = function (_policies) {
         pathMap.method = _.isUndefined(regex_result[1]) ? 'get' : regex_result[1].trim().toLowerCase();
         pathMap.path = regex_result[3] + ((_.isUndefined(regex_result[4])) ? '' : regex_result[4]);
         return pathMap;
-    },
-
-    decorateReq = function (req, mtd) {
-        //For IO Requests.
-
-
-        //var data = JSON.parse(req.data);
-        //req.url = data.url;
-        req.method = mtd;
-
-        if (mtd === 'post' || mtd === 'put') {
-            req.body = req.data;
-        } else {
-            req.query = req.data;
-        }
-
-        var result = req.path.match(/(\/\w+)\/(\d+)/i);
-
-
-
-        if (result) {
-            if (!req.body) {
-                req.body = {id: result[2]};
-            } else {
-                req.body['id'] = result[2];
-            }
-            req.path = req.method === 'get'? result[1] : result[1] + '/:id';
-
-        }
-        var tok = {};
-        if (req.headers && req.headers['x-csrf-token']) {
-            tok['x-csrf-token'] = req.headers['x-csrf-token'];
-        }
-        req.parameters = utils.extend({}, tok, req.query, req.body, req.params);
-        delete req.data;
-        delete req.query;
-        delete req.body;
-        delete req.params;
     };
 
-
-
-
+    

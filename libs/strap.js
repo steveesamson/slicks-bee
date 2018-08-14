@@ -72,7 +72,7 @@ module.exports = function (app, resource) {
                 normalized = resource.normalizePath(path),
                 policy = myPolicy ? (myPolicy[handler_name] ? myPolicy[handler_name] : (myGlobalPolicy ? myGlobalPolicy : (globalPolicy || []))) : (globalPolicy ? globalPolicy : []);
 
-            policy.push(resource.slicksTenancy); //Added
+            // policy.push(resource.slicksTenancy); //Added/Removed
             // console.log('Handler: ' + handler_name + ' path: ' + normalized.path + ' method: ' + normalized.method);
             if (controller[handler_name]) {
                 app[normalized.method](normalized.path, policy, controller[handler_name]);
@@ -172,7 +172,7 @@ module.exports = function (app, resource) {
                 };
 
 
-                resource.decorateReq(req, method);
+                resource.slicksIORouter(req, method);
 
                 req.io = socket;
                 req.url = req.path;
@@ -183,14 +183,8 @@ module.exports = function (app, resource) {
                 // console.log("Params: ", req.parameters);
                 // console.log("IO x-token: ", req.parameters['x-csrf-token']);
 
-                // req.db = 'io-tenant';
-
-                //ioRoutes[method][req.path]['handler'](req, res);
                 ioRoutes[method][req.path](req, res);
 
-                //app.runMiddleware(req.path, socket,function(code,body,headers){
-                //    console.log('Code:%s, Body:%s,  Headers:%s',code, body, headers);
-                //});
 
 
             });

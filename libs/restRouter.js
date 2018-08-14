@@ -3,6 +3,7 @@
  */
 
 
+ let slicksTenancy = require('./slicks-tenancy');
 module.exports = function (req, res, next) {
 
 
@@ -18,7 +19,8 @@ module.exports = function (req, res, next) {
     }
     req.parameters = utils.extend({}, tok, req.query, req.body);
     // console.log("AJAX x-token: ", req.parameters['x-csrf-token']);
-    next();
+    // next();
+    slicksTenancy(req,next);
 };
 
 

@@ -1,4 +1,4 @@
-module.exports = function (req, res, next) {
+module.exports = function (req, next) {
 
 
     // console.log('Tenancy: ', isMultitenant);
@@ -10,16 +10,16 @@ module.exports = function (req, res, next) {
                 if (!err && typeof decoded !== 'undefined') {
                     req.db = SlickSources[decoded.tenant];
                 }
-                next();
+                next && next();
 
             });
 
         }else{
             req.db = SlickSources['default'];
-            next();
+            next && next();
         }
     }else{
         req.db = SlickSources['default'];
-        next();
+        next && next();
     }
 }
