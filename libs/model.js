@@ -5,7 +5,7 @@
 module.exports = function (model) {
     var modelName = model.toLocaleLowerCase(),
         SMClean = require('smclean'),
-        broadcast = function(load){
+        broadcast = function (load) {
             IO.sockets.emit('comets', load);
         };
 
@@ -32,15 +32,15 @@ module.exports = function (model) {
         verbatims: [], //['attachments'] excludes from mclean.
         searchPath: [], //['attachments'] excludes from mclean.
         postCreate: function (req, data) {
-            
+
         },
         postUpdate: function (req, data) {
 
         },
-        postDestroy: function (req, data){
+        postDestroy: function (req, data) {
 
         },
-        broadcastUpdate:function(load){
+        broadcastUpdate: function (load) {
             var pload = {
                 verb: 'update',
                 room: modelName,
@@ -48,7 +48,7 @@ module.exports = function (model) {
             };
             broadcast(pload);
         },
-        broadcastCreate:function(load){
+        broadcastCreate: function (load) {
             var pload = {
                 verb: 'create',
                 room: modelName,
@@ -56,7 +56,7 @@ module.exports = function (model) {
             };
             broadcast(pload);
         },
-        broadcastDestroy:function(load){
+        broadcastDestroy: function (load) {
             var pload = {
                 verb: 'destroy',
                 room: modelName,
@@ -66,7 +66,9 @@ module.exports = function (model) {
         },
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
-            this.postCreate({db:req.db}, load);
+            this.postCreate({
+                db: req.db
+            }, load);
             if (req.io) {
 
                 var pload = {
@@ -74,14 +76,16 @@ module.exports = function (model) {
                     room: modelName,
                     data: load
                 };
-                
+
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishCreate to %s', modelName);
             }
         },
 
         publishUpdate: function (req, load) {
-            this.postUpdate({db:req.db},load);
+            this.postUpdate({
+                db: req.db
+            }, load);
             if (req.io) {
                 var pload = {
                     verb: 'update',
@@ -94,16 +98,34 @@ module.exports = function (model) {
         },
         publishDestroy: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('destroyed', {message: load});
-            this.postDestroy({db:req.db},load);
+            this.postDestroy({
+                db: req.db
+            }, load);
             if (req.io) {
                 var pload = {
                     data: load,
                     verb: 'destroy',
                     room: modelName
                 };
-               
+
                 req.io.broadcast.emit('comets', pload);
                 console.log('PublishDestroy to %s', modelName);
+            }
+        },
+        setConditions: function (options) {
+
+            this.sanitizeParams(options);
+
+            for (var attr in this.attributes) {
+                if (attr in options) {
+
+                    if (utils.isArray(options[attr])) {
+                        var nArr = (this.attributes[attr] === 'string') ? options[attr].map(v => `'${v}'`) : options[attr];
+                        this.db.whereIn(modelName + '.' + attr, nArr);
+                    } else {
+                        this.db.where(modelName + '.' + attr, options[attr]);
+                    }
+                }
             }
         },
         sanitizeParams: function (options) {
@@ -118,10 +140,18 @@ module.exports = function (model) {
 
                     if (self.verbatims.indexOf(attr) !== -1) continue;
 
-                    options[attr] = SMClean[type](options[attr]);
+                    if (utils.isArray(options[attr])) {
+                        let copy = options[attr].slice(0, options[attr].length);
+                        copy = copy.map(e => SMClean[type](e));
+                        options[attr] = copy;
+
+                    } else {
+                        options[attr] = SMClean[type](value);
+                    }
                 }
             }
         },
+
         search: function (searchString, searchPath) {
             var self = this,
                 params = '';
@@ -191,16 +221,12 @@ module.exports = function (model) {
             }
 
         },
+
         find: function (options, cb) {
 
             var self = this;
-            this.sanitizeParams(options);
+            this.setConditions(options);
 
-            for (var attr in this.attributes) {
-                if (attr in options) {
-                    this.db.where(modelName + '.' + attr, options[attr]);
-                }
-            }
 
             if (options['search']) {
                 this.search(options['search']);
@@ -235,38 +261,20 @@ module.exports = function (model) {
                 self.prepareResult(err, rows, options, cb);
             });
         },
-        counts: function (options, cb) {
-            this.sanitizeParams(options);
 
-            for (var attr in this.attributes) {
-                if (attr in options) {
-                    this.db.where(modelName + '.' + attr, options[attr]);
-                }
-            }
-            this.db.select('COUNT(*) AS count')
-                .from(modelName)
-                .fetch(function (err, rows) {
-
-                    if (err) {
-                        (cb && cb(err));
-                        return;
-                    }
-                    if (rows.length) {
-                        (cb && cb(false, rows[0]));
-                    } else {
-                        (cb && cb(false, false));
-                    }
-
-                });
-        },
         destroy: function (options, cb) {
 
-            this.sanitizeParams(options);
-
-            if (!options.id) {
-                var err = new Error('You need an id to destroy any model');
+            if (!options.id && !options.where) {
+                var err = new Error('You need an id/where object to destroy any model');
                 (cb && cb(err));
                 return;
+            }
+
+            if(options.id){
+                this.db.where('id', SMClean.int(options.id));
+            }else if(options.where){
+                let where = options.where;
+                this.setConditions(where);
             }
 
             if (this.checkConcurrentUpdate) {
@@ -274,8 +282,8 @@ module.exports = function (model) {
                 delete options[this.checkConcurrentUpdate];
             }
 
-            this.db.where('id', options.id)
-                .delete(modelName, function (err, result) {
+            // 
+            this.db.delete(modelName, function (err, result) {
 
                     if (err) {
                         (cb && cb(err));
@@ -286,15 +294,18 @@ module.exports = function (model) {
         },
         update: function (options, cb) {
 
-
-            this.sanitizeParams(options);
-
-            if (!options.id) {
-                var err = new Error('You need an id to update any model');
+            if (!options.id && !options.where) {
+                var err = new Error('You need an id/where object to update any model');
                 (cb && cb(err));
                 return;
             }
 
+            if(options.id){
+                this.db.where('id',  SMClean.int(options.id));
+            }else if(options.where){
+                let where = options.where;
+                this.setConditions(where);
+            }
 
             if (this.checkConcurrentUpdate) {
 
@@ -311,9 +322,7 @@ module.exports = function (model) {
                 }
             }
 
-
-            this.db.where('id', options.id)
-                .update(modelName, function (err, result) {
+            this.db.update(modelName, function (err, result) {
 
                     if (err) {
                         (cb && cb(err));
@@ -321,7 +330,7 @@ module.exports = function (model) {
                     }
                     (cb && cb(false, result));
                 });
-        },
+        },            
         create: function (options, cb) {
 
             this.sanitizeParams(options);
@@ -350,6 +359,5 @@ module.exports = function (model) {
         }
 
     };
-
 
 };

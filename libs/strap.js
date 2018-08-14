@@ -183,6 +183,7 @@ module.exports = function (app, resource) {
                 // console.log("Params: ", req.parameters);
                 // console.log("IO x-token: ", req.parameters['x-csrf-token']);
 
+                if(!req.path.trim()) return;
                 ioRoutes[method][req.path](req, res);
 
 
