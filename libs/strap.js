@@ -6,6 +6,7 @@ var fs = require('fs'),
 
         return c.slice(0, c.length);
     },
+    fspath = require('path'),
     ext = function (fileName) {
 
         var result = fileName.split('.');
@@ -103,6 +104,15 @@ module.exports = function (app, resource) {
 
     }
 
+    if(resource.config.application.spa_strict){
+
+        console.log('SPA MODE on');
+        app.get('*', function(req, res) {  
+            res.sendFile(fspath.join(PUBLIC_DIR + '/index.html'));
+        });
+    }else{
+        console.log('SSR MODE on');
+    }
     //console.log('ioRoutes: ', ioRoutes);
 
 
@@ -132,7 +142,7 @@ module.exports = function (app, resource) {
                 if (e) {
 
                     cb && cb({
-                        errpr: 'Error while uploading -\'' + file.name + '\' ' + e.message
+                        error: 'Error while uploading -\'' + file.name + '\' ' + e.message
                     });
 
                 } else {
