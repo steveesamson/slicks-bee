@@ -115,6 +115,8 @@ module.exports = function (app, resource) {
     }
     //console.log('ioRoutes: ', ioRoutes);
 
+   
+
 
     global['SlicksDecoder'] = {
         writeStreamTo: function (req, options, cb) {
@@ -201,6 +203,14 @@ module.exports = function (app, resource) {
             });
         });
     });
+
+    if(resource.config.application.redo_logs){
+
+        let Redoer = require('./Redoer')('default');
+        Redoer.start();
+        
+
+    }
 
 
 };

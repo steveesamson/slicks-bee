@@ -40,6 +40,31 @@ module.exports = function (model) {
         postDestroy: function (req, data) {
 
         },
+        relay:function(req, data){
+
+            // return console.log('Got: ', req, data);
+
+            const {id, room_id, room } = data;
+            delete data.id;
+            delete data.room_id;
+
+            if(data.verb === 'destroy'){
+                data.data = {id:room_id};
+                broadcast(data);
+                this.destroy({id:id}, false);
+            }else{
+
+                let mId = makeName(room).replace(/\s/,'_');
+                let _model = Models[mId](req);
+                _model.find({id:room_id}, (e, rec) => {
+                    if(!e){
+                       data.data = rec;
+                       broadcast(data);
+                       this.destroy({id:id}, false);
+                    }
+                });
+            }
+        },
         broadcastUpdate: function (load) {
             var pload = {
                 verb: 'update',
@@ -64,6 +89,7 @@ module.exports = function (model) {
             };
             broadcast(pload);
         },
+        
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
             this.postCreate({

@@ -18,15 +18,15 @@ module.exports = function (base) {
         dbUtils = require('./libs/dbUtils')(databases, resource),
         dbKeys = utils.keys(resource.config.databases),
         cfg = dbUtils.nextItem(dbKeys),
-        port = parseInt(resource.config.application.port),
-        start = function () {
+        port = parseInt(resource.config.application.port);
 
+        global['SlickSources'] = databases;
+        config.configureModel(databases);
+        config.configureController();
+        config.configureRoute();
+        config.configurePolicy();
 
-            global['SlickSources'] = databases;
-            config.configureModel(databases);
-            config.configureController();
-            config.configureRoute();
-            config.configurePolicy();
+       var start = function () {
 
 
             if (cluster.isMaster) {

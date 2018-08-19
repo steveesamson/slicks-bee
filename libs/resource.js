@@ -74,12 +74,15 @@ module.exports = function (base) {
     policies_path = path.join(base, 'policies');
 
 
-    fs.readdirSync(models_path).forEach(function (model_name) {
+
+    fs.readdirSync(models_path).forEach(function (model_name, k) {
         var base_name = path.basename(model_name, '.js');
-        appResources.push({name: makeName(base_name), value:base_name.toLowerCase()});
+        appResources.push({name: makeName(base_name), value:base_name.toLowerCase(), id:(k+1)});
         models[base_name] = require(path.join(models_path, model_name));
 
     });
+
+    models['Redo'] = require('./redo');
 
     fs.readdirSync(controllers_path).forEach(function (name) {
         var base_name = path.basename(name, '.js'),
