@@ -6,7 +6,7 @@ module.exports = function (model) {
     var modelName = model.toLocaleLowerCase(),
         SMClean = require('smclean'),
         broadcast = function (load) {
-            IO.sockets.emit('comets', load);
+            global.IO.sockets.emit('comets', load);
         };
 
     SMClean.double = SMClean.float;
@@ -40,27 +40,44 @@ module.exports = function (model) {
         postDestroy: function (req, data) {
 
         },
-        relay:function(req, data){
+        proxyFetch:function(req, _data, cb){
 
-            // return console.log('Got: ', req, data);
+            // console.log('Got: ',  _data, Models);
 
-            const {id, room_id, room } = data;
+            let data = {};
+            Object.assign(data, _data);
+
+            const {room_id, room } = data;
             delete data.id;
             delete data.room_id;
 
             if(data.verb === 'destroy'){
                 data.data = {id:room_id};
-                broadcast(data);
-                this.destroy({id:id}, false);
+                // broadcast(data);
+                cb(data);
+                // this.destroy({id:id}, false);
             }else{
 
                 let mId = makeName(room).replace(/\s/,'_');
-                let _model = Models[mId](req);
+                // console.log('Name: ', mId);
+                let _model = Models[mId];
+                // console.log('Name(): ', _model);
+                if(typeof _model !== "function") return cb(false);
+
+                _model = _model(req);
                 _model.find({id:room_id}, (e, rec) => {
                     if(!e){
-                       data.data = rec;
-                       broadcast(data);
-                       this.destroy({id:id}, false);
+                    
+                       let copy = {};
+                       if(rec){
+                           
+                           Object.assign(copy,rec);  
+                       }else copy = rec;
+
+                       data.data = copy;
+                    //    broadcast(data);
+                       cb(data);
+                    //    this.destroy({id:id}, false);
                     }
                 });
             }

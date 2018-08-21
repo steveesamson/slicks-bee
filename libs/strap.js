@@ -160,7 +160,7 @@ module.exports = function (app, resource) {
         }
     };
 
-    global.IO = app.io;
+    // global.IO = app.io;
     app.io.sockets.on('connection', function (socket) {
 
         console.log('Connected: ', socket.id);
@@ -203,14 +203,5 @@ module.exports = function (app, resource) {
             });
         });
     });
-
-    if(resource.config.application.redo_logs){
-
-        let Redoer = require('./Redoer')('default');
-        Redoer.start();
-        
-
-    }
-
 
 };

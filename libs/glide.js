@@ -24,6 +24,7 @@ module.exports = function (resource) {
 
     app.server = server;
     app.io = io;
+    global.IO = io;
 
 
     require('./strap')(app, resource);

@@ -7,6 +7,9 @@ module.exports = function (databases, resource) {
     var du = {
 
         load: function (cfg, cb, oc) {
+
+            if(!cfg.item) return oc();
+
             require('./slicksdb')(resource.config.databases[cfg.item], function (err, db) {
 
                 if (err) {
