@@ -28,13 +28,41 @@ module.exports = function (base) {
         if (cluster.isMaster) {
 
             let count = os.cpus().length,
-                rand = function getRandomInt() {
-                    return Math.floor(Math.random() * Math.floor(count + 1));
-                },
-                getAWorker = function () {
-                    return cluster.workers[rand()];
-                },
-                port = parseInt(resource.config.application.port);
+                startedWorkers = 0,
+                port = parseInt(resource.config.application.port),
+                startWatches = function(){
+
+                    if (resource.config.application.redo_logs) {
+                        startedWorkers += 1;
+                        require('./libs/request').post('/login', {
+                            username: "helpd",
+                            password: "1abc12345xyz$"
+                        }, function (e, resp) {
+                            if (e) {
+                                console.log('Error: ', e);
+                                return process.exit(1);
+                            }
+                            console.log('Redo Login was Ok!');
+                            let token = resp.token;
+                           
+                            Object.keys(databases).forEach(k => {
+                                let Redoer = require('./libs/Redoer')(k, token);
+
+                                Redoer.start();
+                            });
+                            
+                        });
+                    }
+
+                    if (resource.config.application.mailer) {
+                        startedWorkers += 1;
+                        Object.keys(databases).forEach(k => {
+                            let Mailer = require('./libs/Mailer')(k);
+
+                            Mailer.start();
+                        });
+                    }
+                };
 
             // This stores our workers. We need to keep them to be able to reference
             // them based on source IP address. It's also useful for auto-restart,
@@ -46,6 +74,13 @@ module.exports = function (base) {
                     workers[i] = cluster.fork();
 
                     console.log('Creating Worker: ', workers[i].process.pid);
+                    workers[i].on('message', m =>{
+                        switch(m.type){
+                            case 'STARTED':
+                               !startedWorkers && startWatches();
+                            break;
+                        }
+                    });
                     // Optional: Restart worker on exit
                     workers[i].on('exit', function (code, signal) {
                         console.log('Respawning worker', i);
@@ -87,18 +122,6 @@ module.exports = function (base) {
             });
 
 
-            if (resource.config.application.redo_logs) {
-                setTimeout(() => {
-                    Object.keys(databases).forEach(k => {
-                        let Redoer = require('./libs/Redoer')(k, getAWorker);
-                        Redoer.start();
-                    });
-                }, 2000);
-            }
-
-
-
-
 
         } else {
             // Note we don't use a port here because the master listens on it for us.
@@ -128,13 +151,16 @@ module.exports = function (base) {
                          // event with the connection the master sent us.
                         app.server.emit('connection', connection);
                         connection.resume();
-                        return;
                     }
 
-                }else if(message.room){
-                    // console.log('I got this in process ', message);
-                    app.io.sockets.emit('comets', message); 
                 }
+                
+                // else if(message.room){
+                //     console.log( message);
+                //     console.log(app.io.sockets);
+
+                //     app.io.sockets.emit('comets', message); 
+                // }
 
             });
         }

@@ -40,9 +40,9 @@ module.exports = function (model) {
         postDestroy: function (req, data) {
 
         },
-        proxyFetch:function(req, _data, cb){
+        emitToAll:function(req, _data){
 
-            // console.log('Got: ',  _data, Models);
+            // console.log('Got: ',  _data);
 
             let data = {};
             Object.assign(data, _data);
@@ -53,16 +53,15 @@ module.exports = function (model) {
 
             if(data.verb === 'destroy'){
                 data.data = {id:room_id};
-                // broadcast(data);
-                cb(data);
+                broadcast(data);
+                // cb(data);
                 // this.destroy({id:id}, false);
             }else{
 
                 let mId = makeName(room).replace(/\s/,'_');
                 // console.log('Name: ', mId);
                 let _model = Models[mId];
-                // console.log('Name(): ', _model);
-                if(typeof _model !== "function") return cb(false);
+                if(typeof _model !== "function") return;
 
                 _model = _model(req);
                 _model.find({id:room_id}, (e, rec) => {
@@ -75,8 +74,8 @@ module.exports = function (model) {
                        }else copy = rec;
 
                        data.data = copy;
-                    //    broadcast(data);
-                       cb(data);
+                       broadcast(data);
+                    //    cb(data);
                     //    this.destroy({id:id}, false);
                     }
                 });
@@ -126,6 +125,7 @@ module.exports = function (model) {
         },
 
         publishUpdate: function (req, load) {
+            
             this.postUpdate({
                 db: req.db
             }, load);

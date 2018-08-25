@@ -7,7 +7,7 @@ module.exports = function (req, mtd) {
     //req.url = data.url;
     req.method = mtd;
 
-    if (mtd === 'post' || mtd === 'put') {
+   if (mtd === 'post' || mtd === 'put') {
         req.body = req.data;
     } else {
         req.query = req.data;

@@ -41,6 +41,7 @@ module.exports = function (base) {
         return date.format(_format);
     };
     global['makeName'] = function (str) {
+        if(!str) return '';
         var index = str.indexOf('_');
         if (index < 0) {
             return str == 'id' ? str.toUpperCase() : (str.charAt(0)).toUpperCase() + str.substring(1);
@@ -82,13 +83,17 @@ module.exports = function (base) {
 
     });
 
-    models['Redo'] = require('./redo');
+    models['Redo'] = require('./Redo');
+    models['Mails'] = require('./Mails');
 
     fs.readdirSync(controllers_path).forEach(function (name) {
         var base_name = path.basename(name, '.js'),
             base_name = base_name.replace('Controller', '');
         controllers[base_name] = require(path.join(controllers_path, name));
     });
+
+    controllers['Redo'] = require('./RedoController');
+    controllers['Mails'] = require('./MailsController');
 
     fs.readdirSync(middlewares_path).forEach(function (name) {
         middlewares.push(require(path.join(middlewares_path, name)));

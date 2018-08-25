@@ -126,19 +126,7 @@ module.exports = function (modelName) {
         __fields: function(req, res){
             let model = Models[modelName](req);
             res.status(200).json(model.attributes);
-        },
-
-        // counts:function(req, res)
-        // {
-        //     global[modelName].counts(req.parameters, function (err, rows) {
-
-        //         if (err) {
-        //             res.status(200).json({error: err.message});
-        //         } else {
-        //             res.status(200).json(rows);
-        //         }
-        //     })
-        // }
+        }
 
     };
 

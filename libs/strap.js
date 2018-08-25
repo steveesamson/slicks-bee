@@ -198,10 +198,10 @@ module.exports = function (app, resource) {
                 if(!req.path.trim()) return;
                 ioRoutes[method][req.path](req, res);
 
-
-
             });
         });
     });
+
+    process.send({pid: process.pid,type:'STARTED'});
 
 };

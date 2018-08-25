@@ -1,57 +1,24 @@
-module.exports = function(_db, getAWorker){
+let request = require('./request'),
+sendRedo = function (options, cb) {
+
+    request.post('/redo', options, cb);
+
+};
+
+module.exports = function(_db, token){
 
     if(!SlickSources[_db]) return {start: () => false};
 
     let _req = {db:SlickSources[_db]},
+
         Redo = Models.Redo(_req),
-        dispatch = recs => {
-
-            let relayIt = r => {
-
-                Object.assign(r,{tenant:_db});
-                Redo.proxyFetch(_req, r, data => {
-
-                    // console.log('data: ', data)
-                    let load = {};
-                    if(data){
-
-                        Object.assign(load, data);
-                    }else load = data;
-                    // console.log('load: ', load)
-                    
-
-                    if(data){
-                        let worker = getAWorker();
-                        if(worker){
-                            worker.send(load);
-                        }
-
-                    }
-                    Redo.destroy({id:r.id});
-
-                    if(recs.length){
-
-                        relayIt(recs.pop());
-
-                    }else setTimeout(start,1000);
-
-                });
-            };
-
-            if(recs.length){
-
-                relayIt(recs.pop());
-
-            }else setTimeout(start,1000);
-        }, 
         redo = cb => {
 
-            Redo.find({limit:100}, function(e, recs){
+            Redo.find({limit:10}, function(e, recs){
                 if(!e){
                     cb(recs);
                 }else{
                     console.error(e);
-                    // cb([]);
                 }
 
             })
@@ -59,10 +26,37 @@ module.exports = function(_db, getAWorker){
         },
         start = () => {
             redo( dispatch );
-        };
+        },
+        dispatch = recs => {
+
+            let relayIt = r => {
+
+                Object.assign(r,{tenant:_db,'x-csrf-token': token});
+                sendRedo(r, (e, m) =>{
+                    if(e){
+
+                        console.error(e, m);
+                    }
+                });
+
+                if(recs.length){
+
+                    relayIt(recs.pop());
+
+                }else setTimeout(start,100);
+
+                
+            };
+
+            if(recs.length){
+
+                relayIt(recs.pop());
+
+            }else setTimeout(start,100);
+        }; 
+       
 
         console.log('Registered redo logs for ', _db);
-        // start();
 
         return {
             start:start
