@@ -150,7 +150,7 @@ module.exports = function (app, resource) {
                 } else {
                     dest = dest.replace(PUBLIC_DIR, '');
                     cb && cb({
-                        text: 'Picture uploaded successfully.',
+                        text: 'Document uploaded successfully.',
                         src: dest
                     });
                 }

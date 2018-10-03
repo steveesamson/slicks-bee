@@ -3,6 +3,7 @@
  */
 var express = require('express'),
     errorHandler = require('errorhandler'),
+    helmet = require('helmet'),
     methodOverride = require('method-override');
 //stud = require('stud');
 
@@ -11,7 +12,7 @@ module.exports = function (resource) {
 
 
     app.set('port', resource.config.application.port);
-
+    app.use(helmet());
     app.use(resource.slicksMultiparts());
     app.use(methodOverride());                  // simulate DELETE and PUT
     app.use(resource.slickRouter);

@@ -2,7 +2,8 @@
  * Created by steve Samson <stevee.samson@gmail.com> on 2/5/14.
  */
 //var module.filename.slice(__filename.lastIndexOf('/')+1, module.filename.length -3);
-var svgCaptcha = require('svg-captcha');
+var svgCaptcha = require('svg-captcha'),
+    shortid = require('shortid');
 module.exports = {
 
     //index: function (req, res) {
@@ -10,7 +11,7 @@ module.exports = {
     //},
     xexcel: function (req, res) {
 
-        var file_name = "Konvaj_" + req.parameters['filename'];
+        var file_name = "Slicks-Bee_" + req.parameters['filename'];
         res.setHeader("Content-Type", "application/vnd.ms-excel");
         res.setHeader("Content-Disposition", "attachment; filename=" + file_name + ".xls");
         res.setHeader("Pragma", "no-cache");
@@ -19,7 +20,9 @@ module.exports = {
     },
     streampix: function (req, res) {
 
-        SlicksDecoder.writeStreamTo(req, {save_as: PUBLIC_DIR + '/uploads/' + req.parameters.save_as + '.jpg'}, function (done) {
+        let  store_name = req.parameters.store_name,
+        save_as = req.parameters.save_as || shortid.generate();
+        SlicksDecoder.writeStreamTo(req, {save_as: `${PUBLIC_DIR}/uploads/${store_name}/${save_as}.jpg`}, function (done) {
             res.status(200).json(done);
         });
     },
@@ -135,9 +138,10 @@ module.exports = {
 
     },
     uploadpix: function (req, res) {
-
+        let  store_name = req.parameters.store_name,
+        save_as = req.parameters.save_as || shortid.generate();
         SlicksDecoder.writeFileTo(req, {
-            save_as: PUBLIC_DIR + '/uploads/' + req.parameters.save_as,
+            save_as: `${PUBLIC_DIR}/uploads/${store_name}/${save_as}`,
             load_name: 'load'
         }, function (done) {
 

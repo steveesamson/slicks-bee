@@ -40,6 +40,7 @@
     "nodemailer": "^4.6.8",
     "nodemailer-smtp-pool": "^2.8.3",
     "shortid": "^2.2.13",
+    "helmet": "^3.13.0",
     "smclean": "^1.0.1",
     "socket.io": "^2.0.1",
     "socket.io-redis": "^5.1.0",
