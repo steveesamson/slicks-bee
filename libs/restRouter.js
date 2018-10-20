@@ -3,7 +3,7 @@
  */
 
 
- let slicksTenancy = require('./slicks-tenancy');
+let slicksTenancy = require('./slicks-tenancy');
 module.exports = function (req, res, next) {
 
 
@@ -13,16 +13,15 @@ module.exports = function (req, res, next) {
         req.body = req.body || {};
         req.body['id'] = result[1];
     }
-    var tok = {};
-    if (req.headers && req.headers['x-csrf-token']) {
-        tok['x-csrf-token'] = req.headers['x-csrf-token'];
-    }
-    req.parameters = utils.extend({}, tok, req.query, req.body);
+    // var tok = {};
+    // if (req.headers && req.headers['x-csrf-token']) {
+    //     tok['x-csrf-token'] = req.headers['x-csrf-token'];
+    // }
+    req.parameters = utils.extend({}, req.query, req.body);
     // console.log("AJAX x-token: ", req.parameters['x-csrf-token']);
     // next();
     slicksTenancy(req,next);
 };
-
 
 
 

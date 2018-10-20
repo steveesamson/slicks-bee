@@ -34,24 +34,13 @@ module.exports = function (base) {
 
                     if (resource.config.application.redo_logs) {
                         startedWorkers += 1;
-                        require('./libs/request').post('/login', {
-                            username: "helpd",
-                            password: "1abc12345xyz$"
-                        }, function (e, resp) {
-                            if (e) {
-                                console.log('Error: ', e);
-                                return process.exit(1);
-                            }
-                            console.log('Redo Login was Ok!');
-                            let token = resp.token;
-                           
+                        
                             Object.keys(databases).forEach(k => {
-                                let Redoer = require('./libs/Redoer')(k, token);
+                                let Redoer = require('./libs/Redoer')(k);
 
                                 Redoer.start();
                             });
                             
-                        });
                     }
 
                     if (resource.config.application.mailer) {
@@ -155,12 +144,6 @@ module.exports = function (base) {
 
                 }
                 
-                // else if(message.room){
-                //     console.log( message);
-                //     console.log(app.io.sockets);
-
-                //     app.io.sockets.emit('comets', message); 
-                // }
 
             });
         }

@@ -4,6 +4,8 @@
 var express = require('express'),
     errorHandler = require('errorhandler'),
     helmet = require('helmet'),
+    cookieParser = require('cookie-parser'),
+    iocookieParser = require('socket.io-cookie');
     methodOverride = require('method-override');
 //stud = require('stud');
 
@@ -13,6 +15,7 @@ module.exports = function (resource) {
 
     app.set('port', resource.config.application.port);
     app.use(helmet());
+    app.use(cookieParser());
     app.use(resource.slicksMultiparts());
     app.use(methodOverride());                  // simulate DELETE and PUT
     app.use(resource.slickRouter);
@@ -21,7 +24,7 @@ module.exports = function (resource) {
 
     var server = require('http').Server(app),
         io = require('socket.io')(server);
-
+        io.use(iocookieParser);
 
     app.server = server;
     app.io = io;

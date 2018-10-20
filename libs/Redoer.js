@@ -5,7 +5,7 @@ sendRedo = function (options, cb) {
 
 };
 
-module.exports = function(_db, token){
+module.exports = function(_db){
 
     if(!SlickSources[_db]) return {start: () => false};
 
@@ -31,7 +31,7 @@ module.exports = function(_db, token){
 
             let relayIt = r => {
 
-                Object.assign(r,{tenant:_db,'x-csrf-token': token});
+                Object.assign(r,{tenant:_db});
                 sendRedo(r, (e, m) =>{
                     if(e){
 

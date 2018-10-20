@@ -26,11 +26,8 @@ module.exports = function (req, mtd) {
         req.path = req.method === 'get'? result[1] : result[1] + '/:id';
 
     }
-    var tok = {};
-    if (req.headers && req.headers['x-csrf-token']) {
-        tok['x-csrf-token'] = req.headers['x-csrf-token'];
-    }
-    req.parameters = utils.extend({}, tok, req.query, req.body, req.params);
+
+    req.parameters = utils.extend({}, req.query, req.body, req.params);
     delete req.data;
     delete req.query;
     delete req.body;

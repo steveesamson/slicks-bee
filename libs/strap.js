@@ -188,6 +188,8 @@ module.exports = function (app, resource) {
 
                 req.io = socket;
                 req.url = req.path;
+                req.cookies = socket.handshake.headers.cookie || socket.request.headers.cookie;
+
 
 
                 // console.log("mtd: ",method);
