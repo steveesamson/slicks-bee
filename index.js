@@ -30,27 +30,38 @@ module.exports = function (base) {
             let count = os.cpus().length,
                 startedWorkers = 0,
                 port = parseInt(resource.config.application.port),
-                startWatches = function(){
+                startWatches = function () {
 
-                    if (resource.config.application.redo_logs) {
+                    // if (resource.config.application.redo_logs) {
                         startedWorkers += 1;
-                        
-                            Object.keys(databases).forEach(k => {
-                                let Redoer = require('./libs/Redoer')(k);
 
-                                Redoer.start();
-                            });
-                            
-                    }
-
-                    if (resource.config.application.mailer) {
-                        startedWorkers += 1;
                         Object.keys(databases).forEach(k => {
-                            let Mailer = require('./libs/Mailer')(k);
+                            let db = databases[k];
+                            if (db.cdc) {
+                                let Redoer = require('./libs/Redoer')(k);
+                                Redoer.start();
+                            }
 
-                            Mailer.start();
+                            if (db.maillog) {
+                                let Mailer = require('./libs/Mailer')(k);
+                                Mailer.start();
+                            }
+
                         });
-                    }
+
+                    // }
+
+                    // if (resource.config.application.mailer) {
+                    //     startedWorkers += 1;
+                    //     Object.keys(databases).forEach(k => {
+                    //         let db = databases[k];
+
+                    //         if (db.host_mail) {
+                    //             let Mailer = require('./libs/Mailer')(k);
+                    //             Mailer.start();
+                    //         }
+                    //     });
+                    // }
                 };
 
             // This stores our workers. We need to keep them to be able to reference
@@ -63,11 +74,11 @@ module.exports = function (base) {
                     workers[i] = cluster.fork();
 
                     console.log('Creating Worker: ', workers[i].process.pid);
-                    workers[i].on('message', m =>{
-                        switch(m.type){
+                    workers[i].on('message', m => {
+                        switch (m.type) {
                             case 'STARTED':
-                               !startedWorkers && startWatches();
-                            break;
+                                !startedWorkers && startWatches();
+                                break;
                         }
                     });
                     // Optional: Restart worker on exit
@@ -132,18 +143,18 @@ module.exports = function (base) {
             // Listen to messages sent from the master. Ignore everything else.
             // process.on('message', function(message, connection) {
             process.on('message', function (message, connection) {
-                
-                if(typeof message === 'string'){
+
+                if (typeof message === 'string') {
 
                     if (message === 'sticky-session:connection') {
-                         // Emulate a connection event on the server by emitting the
-                         // event with the connection the master sent us.
+                        // Emulate a connection event on the server by emitting the
+                        // event with the connection the master sent us.
                         app.server.emit('connection', connection);
                         connection.resume();
                     }
 
                 }
-                
+
 
             });
         }

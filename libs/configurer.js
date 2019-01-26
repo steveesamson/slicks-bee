@@ -24,10 +24,19 @@ module.exports = function(resource) {
 
 					return function(req){
 						if(!req || !req.db){
-							console.error('Null db object, check all your database connections...');
+							throw new Error('Null db object, check all your database connections...');
 						}
 						let copy = utils.clone(mdl);
-						copy['db'] = req.db;
+
+						if(copy.store){
+							let db = SlickSources[copy.store];
+							if(!db){
+								throw new Error(`Store '${copy.store}' for ${copy.instanceName} could not be found, check all your database connections...`);
+							}
+							copy['db'] = db;
+						}else{
+							copy['db'] = req.db;
+						}
 						return copy;
 					}
 
