@@ -13,7 +13,7 @@ module.exports = function (req, mtd) {
         req.query = req.data;
     }
 
-    var result = req.path.match(/(\/\w+)\/(\d+)/i);
+    var result = req.path.match(/(\/\w+)\/(\w+)/i);
 
 
 

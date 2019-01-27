@@ -56,7 +56,7 @@ module.exports = function(_db){
         }; 
        
 
-        console.log('Registered redo logs for ', _db);
+        console.log('Registered change data capture(CDC) for ', _db);
 
         return {
             start:start

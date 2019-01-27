@@ -6,10 +6,10 @@ var baseModel = require('./model'),
 	restController = require('./rest'),
 	indexController = require('./IndexController');
 
-module.exports = function(resource) {
+module.exports = function (resource) {
 	global.Models = {};
 	return {
-		configureModel: function(databases) {
+		configureModel: function (databases) {
 			var models = resource.models;
 			for (var m in models) {
 				var dbcopy = utils.clone(databases),
@@ -20,21 +20,22 @@ module.exports = function(resource) {
 				var model = utils.extend(baseModel(m), models[m]);
 				model['uniqueKeys'] = utils.union(bkeys, ckeys);
 				// global[m] = model;
-				global.Models[m] = (function(mdl){
+				global.Models[m] = (function (mdl) {
 
-					return function(req){
-						if(!req || !req.db){
-							throw new Error('Null db object, check all your database connections...');
-						}
+					return function (req) {
+
 						let copy = utils.clone(mdl);
 
-						if(copy.store){
+						if (copy.store) {
 							let db = SlickSources[copy.store];
-							if(!db){
+							if (!db) {
 								throw new Error(`Store '${copy.store}' for ${copy.instanceName} could not be found, check all your database connections...`);
 							}
 							copy['db'] = db;
-						}else{
+						} else {
+							if (!req || !req.db) {
+								throw new Error('Null db object, check all your database connections...');
+							}
 							copy['db'] = req.db;
 						}
 						return copy;
@@ -47,7 +48,7 @@ module.exports = function(resource) {
 
 			resource.models = models;
 		},
-		configureController: function() {
+		configureController: function () {
 			var controllers = resource.controllers;
 
 			for (var c in controllers) {
@@ -63,7 +64,7 @@ module.exports = function(resource) {
 
 			resource.controllers = controllers;
 		},
-		configureRoute: function() {
+		configureRoute: function () {
 			var controllers = resource.controllers,
 				routes = {},
 				routes_config = resource.config.routes,
@@ -93,23 +94,23 @@ module.exports = function(resource) {
 							'spinx',
 							'croppix',
 							'resizeimage',
-						].forEach(function(restac) {
+						].forEach(function (restac) {
 							funcs = utils.without(funcs, restac);
 						});
 					}
 
-                    for (var i = 0; i < funcs.length; ++i) {
+					for (var i = 0; i < funcs.length; ++i) {
 
 						for (var rkey in routes_config) {
-                            
-                            let handler = routes_config[rkey];
-                            let controller_method = handler.split('.');
-                            if(controller_method.length < 2){
-                                throw Error('Incorrect route configuration for: ', rkey)
-                            }
-                            if(controller_method[0].trim() === key){
-                                actionRoutes[rkey] = controller_method[1].trim();
-                            }
+
+							let handler = routes_config[rkey];
+							let controller_method = handler.split('.');
+							if (controller_method.length < 2) {
+								throw Error('Incorrect route configuration for: ', rkey)
+							}
+							if (controller_method[0].trim() === key) {
+								actionRoutes[rkey] = controller_method[1].trim();
+							}
 						}
 					}
 				}
@@ -139,11 +140,13 @@ module.exports = function(resource) {
 			//add default route and the handler
 			if (!controllers['Index']) {
 				controllers['Index'] = indexController(resource.config.views.index_file);
-				routes['Index'] = { 'get /': 'index' };
+				routes['Index'] = {
+					'get /': 'index'
+				};
 			}
 			resource['routes'] = routes;
 		},
-		configurePolicy: function() {
+		configurePolicy: function () {
 			var policiesMap = {},
 				policies_config = resource.config.policies;
 
@@ -157,7 +160,9 @@ module.exports = function(resource) {
 					}
 				} else {
 					if (typeof policy === 'string') {
-						policiesMap[k] = { global: resource.loadPolicies(policy.split(',')) };
+						policiesMap[k] = {
+							global: resource.loadPolicies(policy.split(','))
+						};
 					} else if (typeof policy === 'object') {
 						var childPoly = {};
 						for (var o in policy) {
@@ -166,9 +171,9 @@ module.exports = function(resource) {
 								if (typeof poly === 'string') {
 									childPoly['global'] = resource.loadPolicies(poly.split(','));
 								} else if (typeof poly === 'boolean') {
-									childPoly['global'] = !poly
-										? resource.loadPolicies(['denyAll'])
-										: resource.loadPolicies(['denyAll']);
+									childPoly['global'] = !poly ?
+										resource.loadPolicies(['denyAll']) :
+										resource.loadPolicies(['denyAll']);
 								}
 							} else {
 								if (typeof poly === 'string') {

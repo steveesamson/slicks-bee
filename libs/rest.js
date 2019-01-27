@@ -53,7 +53,7 @@ module.exports = function (modelName) {
 
                 }
                 else {
-
+                    // console.log('result: ', result);
                     model.find(result, function (err, row) {
 
                         if (err) {
@@ -61,6 +61,7 @@ module.exports = function (modelName) {
                         } else {
 
                             model.publishCreate(req, row);
+                            // console.log('should send: ', row);
                             res.status(200).json(row);
                         }
                     })

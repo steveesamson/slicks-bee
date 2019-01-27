@@ -40,43 +40,50 @@ module.exports = function (model) {
         postDestroy: function (req, data) {
 
         },
-        emitToAll:function(req, _data){
+        emitToAll: function (req, _data) {
 
             // console.log('Got: ',  _data);
 
             let data = {};
             Object.assign(data, _data);
 
-            const {room_id, room } = data;
+            const {
+                room_id,
+                room
+            } = data;
             delete data.id;
             delete data.room_id;
 
-            if(data.verb === 'destroy'){
-                data.data = {id:room_id};
+            if (data.verb === 'destroy') {
+                data.data = {
+                    id: room_id
+                };
                 broadcast(data);
                 // cb(data);
                 // this.destroy({id:id}, false);
-            }else{
+            } else {
 
-                let mId = makeName(room).replace(/\s/,'_');
+                let mId = makeName(room).replace(/\s/, '_');
                 // console.log('Name: ', mId);
                 let _model = Models[mId];
-                if(typeof _model !== "function") return;
+                if (typeof _model !== "function") return;
 
                 _model = _model(req);
-                _model.find({id:room_id}, (e, rec) => {
-                    if(!e){
-                    
-                       let copy = {};
-                       if(rec){
-                           
-                           Object.assign(copy,rec);  
-                       }else copy = rec;
+                _model.find({
+                    id: room_id
+                }, (e, rec) => {
+                    if (!e) {
 
-                       data.data = copy;
-                       broadcast(data);
-                    //    cb(data);
-                    //    this.destroy({id:id}, false);
+                        let copy = {};
+                        if (rec) {
+
+                            Object.assign(copy, rec);
+                        } else copy = rec;
+
+                        data.data = copy;
+                        broadcast(data);
+                        //    cb(data);
+                        //    this.destroy({id:id}, false);
                     }
                 });
             }
@@ -105,7 +112,7 @@ module.exports = function (model) {
             };
             broadcast(pload);
         },
-        
+
         publishCreate: function (req, load) {
             //            slickIO.room(this.instanceName).broadcast('created', {message: load});
             this.postCreate({
@@ -125,7 +132,7 @@ module.exports = function (model) {
         },
 
         publishUpdate: function (req, load) {
-            
+
             this.postUpdate({
                 db: req.db
             }, load);
@@ -158,18 +165,38 @@ module.exports = function (model) {
         setConditions: function (options) {
 
             this.sanitizeParams(options);
+            switch (this.db.storeType) {
 
-            for (var attr in this.attributes) {
-                if (attr in options) {
+                case 'mongodb':
 
-                    if (utils.isArray(options[attr])) {
-                        var nArr = (this.attributes[attr] === 'string') ? options[attr].map(v => `'${v}'`) : options[attr];
-                        this.db.whereIn(modelName + '.' + attr, nArr);
-                    } else {
-                        this.db.where(modelName + '.' + attr, options[attr]);
+                    for (var attr in this.attributes) {
+                        if (attr in options) {
+
+                            if (utils.isArray(options[attr])) {
+                                var nArr = (this.attributes[attr] === 'string') ? options[attr].map(v => `'${v}'`) : options[attr];
+                                this.db.whereIn(attr, nArr);
+                            } else {
+                                this.db.where(attr, options[attr]);
+                            }
+                        }
                     }
-                }
+
+                    break;
+                default:
+                    for (var attr in this.attributes) {
+                        if (attr in options) {
+
+                            if (utils.isArray(options[attr])) {
+                                var nArr = (this.attributes[attr] === 'string') ? options[attr].map(v => `'${v}'`) : options[attr];
+                                this.db.whereIn(`${modelName}.${attr}`, nArr);
+                            } else {
+                                this.db.where(`${modelName}.${attr}`, options[attr]);
+                            }
+                        }
+                    }
+
             }
+
         },
         sanitizeParams: function (options) {
 
@@ -265,9 +292,40 @@ module.exports = function (model) {
 
         },
 
-        find: function (options, cb) {
+        mongodbFind: function (options, cb) {
 
-            var self = this;
+            let self = this;
+            this.setConditions(options);
+
+
+            if (options['search']) {
+                // this.search(options['search']);
+                console.log('search not supported yet...');
+            }
+
+            (options.limit && this.db.limit(options.limit, options.offset || '0'));
+            if (options.orderby) {
+                this.db.orderBy(options.orderby, options.direction);
+            } else {
+                if (self.orderBy) {
+                    let direction = self.orderDirection || 'ASC';
+                    this.db.orderBy(self.orderBy, direction);
+
+                } else this.db.orderBy("id", 'ASC');
+            }
+            if (options['ROW_COUNT']) {
+                return this.db.count().fetch(modelName, function (err, rows) {
+                    self.prepareResult(err, rows, options, cb);
+                });
+            }
+            this.db.fetch(modelName, function (err, rows) {
+
+                self.prepareResult(err, rows, options, cb);
+
+            });
+        },
+        sqlFind: function (options, cb) {
+            let self = this;
             this.setConditions(options);
 
 
@@ -280,21 +338,37 @@ module.exports = function (model) {
                 this.db.orderBy(options.orderby, options.direction);
             } else {
                 if (self.orderBy) {
-                    var direction = self.orderDirection || 'ASC';
-                    this.db.orderBy(modelName + '.' + self.orderBy, direction);
+                    let direction = self.orderDirection || 'ASC';
+                    this.db.orderBy(`${modelName}.${self.orderBy}`, direction);
 
-                } else this.db.orderBy(modelName + '.id', 'ASC');
+                } else this.db.orderBy(`${modelName}.id`, 'ASC');
             }
-
             if (options['ROW_COUNT']) {
                 return this.rowCount(this.db.compile(modelName), options, cb);
             }
+
             this.db.fetch(modelName, function (err, rows) {
 
                 self.prepareResult(err, rows, options, cb);
 
             });
         },
+        find: function (options, cb) {
+
+            // console.log('storeType: ', this.db.storeType);
+
+            switch (this.db.storeType) {
+                case 'mongodb':
+                    this.mongodbFind(options, cb);
+                    break;
+                default:
+                    this.sqlFind(options, cb);
+            }
+
+
+
+        },
+
         rowCount: function (query, options, cb) {
             var self = this;
             this.sanitizeParams(options);
@@ -313,9 +387,9 @@ module.exports = function (model) {
                 return;
             }
 
-            if(options.id){
+            if (options.id) {
                 this.db.where('id', SMClean.int(options.id));
-            }else if(options.where){
+            } else if (options.where) {
                 let where = options.where;
                 this.setConditions(where);
             }
@@ -328,12 +402,12 @@ module.exports = function (model) {
             // 
             this.db.delete(modelName, function (err, result) {
 
-                    if (err) {
-                        (cb && cb(err));
-                        return;
-                    }
-                    (cb && cb(false, result));
-                });
+                if (err) {
+                    (cb && cb(err));
+                    return;
+                }
+                (cb && cb(false, result));
+            });
         },
         update: function (options, cb) {
 
@@ -343,9 +417,9 @@ module.exports = function (model) {
                 return;
             }
 
-            if(options.id){
-                this.db.where('id',  SMClean.int(options.id));
-            }else if(options.where){
+            if (options.id) {
+                this.db.where('id', SMClean.int(options.id));
+            } else if (options.where) {
                 let where = options.where;
                 this.setConditions(where);
             }
@@ -367,13 +441,13 @@ module.exports = function (model) {
 
             this.db.update(modelName, function (err, result) {
 
-                    if (err) {
-                        (cb && cb(err));
-                        return;
-                    }
-                    (cb && cb(false, result));
-                });
-        },            
+                if (err) {
+                    (cb && cb(err));
+                    return;
+                }
+                (cb && cb(false, result));
+            });
+        },
         create: function (options, cb) {
 
             this.sanitizeParams(options);
