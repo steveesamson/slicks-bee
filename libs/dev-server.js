@@ -45,7 +45,8 @@ module.exports = function (base, cb) {
 
                 if (db.maillog) {
                     console.log('Starting Mail...');
-                    let Mailer = require('./Mailer')(k);
+                    let smtpTransport = require("./smtpTransport")(resource.config.smtp);
+                    let Mailer = require('./Mailer')(k, smtpTransport);
                     Mailer.start();
                 }
 

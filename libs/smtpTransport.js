@@ -1,13 +1,13 @@
-var nodemailer = require('nodemailer'),
+let nodemailer = require('nodemailer'),
     fs = require('fs'),
     stud = require('stud'),
     smtpPool = require('nodemailer-smtp-pool'),
     mailConfig = {
-        service: 'gmail',
-        auth: {
-                user: 'kevwe.samson@gmail.com',
-                pass: '@g0fur30'
-            }
+        // service: 'gmail',
+        // auth: {
+        //         user: 'somename@gmail.com',
+        //         pass: 'pswd'
+        //     }
     },
     // mailConfig = {
     //     host: 'mail.helpals.net',
@@ -25,7 +25,7 @@ var nodemailer = require('nodemailer'),
     // },
     
     mail = function (mailLoad, cb) {
-        var transporter = nodemailer.createTransport(smtpPool(mailConfig)),
+        let transporter = nodemailer.createTransport(smtpPool(mailConfig)),
 	    mailOptions = {
             from: mailLoad.from,// // sender address
             to: mailLoad.to,
@@ -50,11 +50,19 @@ var nodemailer = require('nodemailer'),
     };
     
 
-module.exports = function () {
-    var tpl = fs.readFileSync(__dirname + "/mail.html", "utf8");
+module.exports = function (smtpConfig) {
+
+   
+    const { sender , templateFile} = smtpConfig;
+    delete smtpConfig.sender;
+    delete smtpConfig.templateFile;
+
+    mailConfig = smtpConfig;
+    let tpl = fs.readFileSync( templateFile, "utf8");
+    // console.log(smtpConfig, tpl)
     return {
         sendMail: function (options, cb) {
-            options.from = 'SupportsTeam <noreply@helpals.net>';
+            options.from = sender;
 
             stud.template(tpl, options, function (error, str) {
 

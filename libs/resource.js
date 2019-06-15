@@ -67,6 +67,8 @@ module.exports = function (base) {
         controllers_config = require(path.join(base, 'config', 'controllers')),
         views_config = require(path.join(base, 'config', 'views')),
         app_config = require(path.join(base, 'config', 'application')),
+        smtp_config = require(path.join(base, 'config', 'smtp')),
+        ldap_config = require(path.join(base, 'config', 'ldap')),
         routes_config = require(path.join(base, 'config', 'routes')),
         policies_config = require(path.join(base, 'config', 'policies')),
         database_config = require(path.join(base, 'config', 'databases'));
@@ -151,6 +153,8 @@ module.exports = function (base) {
             controllers: controllers_config,
             views: views_config,
             application: app_config,
+            ldap: ldap_config,
+            smtp: smtp_config,
             routes: routes_config,
             policies: normalizePolicies(),
             databases: database_config

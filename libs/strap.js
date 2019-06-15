@@ -204,6 +204,6 @@ module.exports = function (app, resource) {
         });
     });
 
-    process.send({pid: process.pid,type:'STARTED'});
+    (process.send && process.send({pid: process.pid,type:'STARTED'}));
 
 };

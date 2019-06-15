@@ -7,7 +7,7 @@ let slicksTenancy = require('./slicks-tenancy');
 module.exports = function (req, res, next) {
 
 
-    var result = req.path.match(/\/\w+\/(\w+)/i);
+    var result = req.path.match(/\/\w+\/(\d+)/i);
 
     if (result) {
         req.body = req.body || {};

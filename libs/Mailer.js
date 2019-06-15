@@ -1,6 +1,6 @@
-let messanger = require('./mailer/transport')();
+// let messanger = require('./mailer/transport')();
 
-module.exports = function(_db){
+module.exports = function(_db, messanger){
 
     if(!SlickSources[_db]) return {start: () => false};
 

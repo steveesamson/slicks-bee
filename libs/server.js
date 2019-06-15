@@ -43,7 +43,8 @@ module.exports = function (base) {
                             }
 
                             if (db.maillog) {
-                                let Mailer = require('./Mailer')(k);
+                                let smtpTransport = require("./smtpTransport")(resource.config.smtp),
+                                Mailer = require('./Mailer')(k, smtpTransport);
                                 Mailer.start();
                             }
 
