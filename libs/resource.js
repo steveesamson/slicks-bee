@@ -104,7 +104,10 @@ module.exports = function (base) {
     });
 
     fs.readdirSync(crons_path).forEach(function (name) {
-        crons.push(require(path.join(crons_path, name)));
+        let base_name = path.basename(name, '.js'),
+        job = require(path.join(crons_path, name));
+        job.name = base_name;
+        crons.push(job);
     });
 
     global['utils'] = _;
