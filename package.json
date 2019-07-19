@@ -43,7 +43,6 @@
     "nodemailer": "^4.6.8",
     "nodemailer-smtp-pool": "^2.8.3",
     "shortid": "^2.2.13",
-    "slicks-mysql": "^1.2.6",
     "smclean": "^1.0.1",
     "socket.io": "^2.0.1",
     "socket.io-cookie": "0.0.1",
