@@ -16,6 +16,7 @@ module.exports = function (base, cb) {
 
     let resource = require('./resource')(base),
         databases = {},
+        cronMaster = require('./cron_master'),
         config = require('./configurer')(resource),
         dbUtils = require('./dbUtils')(databases, resource),
         dbKeys = utils.keys(resource.config.databases),
@@ -51,6 +52,8 @@ module.exports = function (base, cb) {
                 }
 
             });
+            cronMaster.init(resource.crons);
+
 
 
         };

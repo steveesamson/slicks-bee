@@ -8,6 +8,7 @@ module.exports = function (base) {
         sio_redis = require('socket.io-redis'),
         farmhash = require('farmhash'),
         cluster = require('cluster'),
+        cronMaster = require('./cron_master')
         os = require('os'),
         databases = {},
         resource = require('./resource')(base),
@@ -49,6 +50,10 @@ module.exports = function (base) {
                             }
 
                         });
+
+                        cronMaster.init(resource.crons);
+
+
 
                   
                 };

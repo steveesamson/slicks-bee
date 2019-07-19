@@ -60,9 +60,11 @@ module.exports = function (base) {
     var controllers = {},
         appResources = [],
         models = {},
+        crons = [],
         middlewares = [],
         controllers_path = path.join(base, 'controllers'),
         middlewares_path = path.join(base, 'middlewares'),
+        crons_path = path.join(base, 'crons'),
         models_path = path.join(base, 'models'),
         controllers_config = require(path.join(base, 'config', 'controllers')),
         views_config = require(path.join(base, 'config', 'views')),
@@ -99,6 +101,10 @@ module.exports = function (base) {
 
     fs.readdirSync(middlewares_path).forEach(function (name) {
         middlewares.push(require(path.join(middlewares_path, name)));
+    });
+
+    fs.readdirSync(crons_path).forEach(function (name) {
+        crons.push(require(path.join(crons_path, name)));
     });
 
     global['utils'] = _;
@@ -149,6 +155,7 @@ module.exports = function (base) {
         controllers: controllers,
         denyAll: denyAll,
         middlewares: middlewares,
+        crons: crons,
         config: {
             controllers: controllers_config,
             views: views_config,

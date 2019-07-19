@@ -58,6 +58,7 @@ module.exports = function (smtpConfig) {
     delete smtpConfig.templateFile;
 
     mailConfig = smtpConfig;
+    
     let tpl = fs.readFileSync( templateFile, "utf8");
     // console.log(smtpConfig, tpl)
     return {

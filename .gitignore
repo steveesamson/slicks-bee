@@ -2,6 +2,8 @@ assets
 config
 controllers
 middlewares
+templates
+crons
 models
 node_modules
 policies
