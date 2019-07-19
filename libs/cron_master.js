@@ -13,7 +13,9 @@ module.exports = {
         console.log(`Started cron:${cronName} successfully.`)
     },
     startAll:function(){
+        console.log(`Starting all crons...`);
         Object.values(cronStack).forEach( v => v.start());
+        console.log(`Started all crons successfully.`)
     },
     stop:function(cronName){
         console.log(`Stopping cron:${cronName}...`);
@@ -22,7 +24,9 @@ module.exports = {
         console.log(`Stopped cron:${cronName} successfully.`)
     },
     stopAll:function(){
+        console.log(`Stopping all crons...`);
         Object.values(cronStack).forEach( v => v.stop());
+        console.log(`Stopped all crons successfully.`)
     },
     init:function(crons){
         crons.forEach(e =>{
@@ -39,15 +43,8 @@ module.exports = {
             }
 
         })
+        crons.length && console.log('Cron routine started.')
 
-        setTimeout(() =>{
-
-            this.stop('Rates');
-            setTimeout(() =>{
-                this.start('Rates');
-            },120000);
-
-        },120000);
     }
 
 }
