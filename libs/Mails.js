@@ -12,6 +12,7 @@ module.exports = {
 		created_time: 'string'
 	},
 	uniqueKeys: ['id'],
+	verbatims:['body'],
 	searchPath: [],
 
 };

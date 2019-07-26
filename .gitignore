@@ -18,3 +18,4 @@ libs.o
 TODO
 test.js
 .idea
+.env

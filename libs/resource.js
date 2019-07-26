@@ -55,6 +55,12 @@ module.exports = function (base) {
         return new_name;
 
     };
+    // let securityConfig = require(path.join(base, 'config', 'security')),
+    //     envConfig = require(path.join(base, '.env')) || {};
+
+    // global['security'] = { ...securityConfig, ...envConfig };
+
+    // console.log('Security: ', security)
     global['security'] = require(path.join(base, 'config', 'security'));
 
     var controllers = {},

@@ -12,9 +12,10 @@ methodOverride = require('method-override');
 
 
 module.exports = function (base, cb) {
-
-
+    
+    
     let resource = require('./resource')(base),
+        environ = require('./environ'),
         databases = {},
         cronMaster = require('./cron_master'),
         config = require('./configurer')(resource),
@@ -29,8 +30,13 @@ module.exports = function (base, cb) {
     config.configurePolicy();
     let app = express();
 
+    let beforeAll = function(){
+
+        environ(base, startServer);
+        
+    }
     // dbUtils.loadDbs(dbKeys, startServer);
-    dbUtils.load(cfg, dbUtils.handler, startServer);
+    dbUtils.load(cfg, dbUtils.handler, beforeAll);
 
 
     function startServer(){

@@ -14,6 +14,7 @@ module.exports = function (base) {
         resource = require('./resource')(base),
         config = require('./configurer')(resource),
         dbUtils = require('./dbUtils')(databases, resource),
+        environ = require('./environ'),
         dbKeys = utils.keys(resource.config.databases),
         cfg = dbUtils.nextItem(dbKeys);
 
@@ -22,7 +23,14 @@ module.exports = function (base) {
     config.configureController();
     config.configureRoute();
     config.configurePolicy();
-    dbUtils.load(cfg, dbUtils.handler, kickOff);
+    let beforeAll = function(){
+
+        environ(base, kickOff);
+        
+    }
+    // dbUtils.loadDbs(dbKeys, startServer);
+    dbUtils.load(cfg, dbUtils.handler, beforeAll);
+    // dbUtils.load(cfg, dbUtils.handler, kickOff);
 
     function kickOff() {
 
