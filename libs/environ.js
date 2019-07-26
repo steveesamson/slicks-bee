@@ -4,6 +4,9 @@ module.exports = function (base, cb) {
 
     // let base = process.cwd();
     // console.log(base)
+
+    if(!fs.existsSync(base + "/.env")) return cb();
+
     const readInterface = readline.createInterface({
         input: fs.createReadStream(base + "/.env"),
         // output: process.stdout,
@@ -14,7 +17,7 @@ module.exports = function (base, cb) {
         if (!line) return;
         const [key, value] = line.split('=');
         // process.env[key] = value;
-        security[key] = value;
+        security[key.trim()] = value.trim();
     });
 
     readInterface.on('close', function () {
