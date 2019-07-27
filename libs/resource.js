@@ -159,6 +159,7 @@ module.exports = function (base) {
 
     global.appResources = appResources;
     global.isMultitenant = (app_config.multitenant === true);
+    global.APP_PORT = app_config.port;
     return {
         models: models,
         controllers: controllers,

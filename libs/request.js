@@ -1,7 +1,7 @@
 var http = require("http");
 var options = {
   hostname: 'localhost',
-  port: 8000,
+  port: APP_PORT,
   headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
   }
@@ -35,8 +35,8 @@ var request = function(url, method, data={}, cb){
 };
 
 
-
 module.exports = {
+
     post:function(url,data,cb){
         request(url,'POST', data, cb);
     }

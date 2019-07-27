@@ -13,7 +13,7 @@ module.exports = function (resource) {
     var app = express();
 
 
-    app.set('port', resource.config.application.port);
+    // app.set('port', resource.config.application.port);
     app.use(helmet());
     app.use(cookieParser());
     app.use(resource.slicksMultiparts());

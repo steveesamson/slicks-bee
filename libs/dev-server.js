@@ -30,13 +30,11 @@ module.exports = function (base, cb) {
     config.configurePolicy();
     let app = express();
 
-    let beforeAll = function(){
-
-        environ(base, startServer);
-        
-    }
+    
     // dbUtils.loadDbs(dbKeys, startServer);
-    dbUtils.load(cfg, dbUtils.handler, beforeAll);
+    dbUtils.load(cfg, dbUtils.handler, function beforeAll(){
+        environ(base, startServer);
+    });
 
 
     function startServer(){
@@ -64,7 +62,7 @@ module.exports = function (base, cb) {
 
         };
 
-        app.set('port', resource.config.application.port);
+        // app.set('port', resource.config.application.port);
         app.use(helmet());
         app.use(cookieParser());
         app.use(resource.slicksMultiparts());
@@ -84,9 +82,9 @@ module.exports = function (base, cb) {
 
         require('./strap')(app, resource);
 
-        app.server.listen(app.get('port'), () => {
+        app.server.listen(APP_PORT, () => {
             startWatches();
-            console.log(`Server started on localhost:${app.get('port')}...`);
+            console.log(`Server started on localhost:${APP_PORT}...`);
             cb && cb();
         });
 

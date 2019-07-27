@@ -23,13 +23,12 @@ module.exports = function (base) {
     config.configureController();
     config.configureRoute();
     config.configurePolicy();
-    let beforeAll = function(){
+    // dbUtils.loadDbs(dbKeys, startServer);
+    dbUtils.load(cfg, dbUtils.handler, function beforeAll(){
 
         environ(base, kickOff);
         
-    }
-    // dbUtils.loadDbs(dbKeys, startServer);
-    dbUtils.load(cfg, dbUtils.handler, beforeAll);
+    });
     // dbUtils.load(cfg, dbUtils.handler, kickOff);
 
     function kickOff() {
@@ -38,7 +37,7 @@ module.exports = function (base) {
 
             let count = os.cpus().length,
                 startedWorkers = 0,
-                port = parseInt(resource.config.application.port),
+                // port = parseInt(resource.config.application.port),
                 startWatches = function () {
 
                     // if (resource.config.application.redo_logs) {
@@ -119,8 +118,8 @@ module.exports = function (base) {
 
                 worker.send('sticky-session:connection', connection);
 
-            }).listen(port, () => {
-                console.log(`Server started on localhost:${port}...`);
+            }).listen(APP_PORT, () => {
+                console.log(`Server started on localhost:${APP_PORT}...`);
             });
 
 

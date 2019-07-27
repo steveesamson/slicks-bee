@@ -37,7 +37,7 @@ module.exports = function(_db, messanger){
 
                     sendMail(recs.pop());
 
-                }else setTimeout(start,60000);
+                }else setTimeout(start,100);
 
                 
             };
@@ -46,7 +46,7 @@ module.exports = function(_db, messanger){
 
                 sendMail(recs.pop());
 
-            }else setTimeout(start,60000);
+            }else setTimeout(start,100);
         }; 
        
 
