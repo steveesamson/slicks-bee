@@ -9,10 +9,14 @@ module.exports = function(_db, messanger){
         Mails = Models.Mails(_req),
         fetchMails = cb => {
 
-            Mails.find({limit:100,sent:'0'}, function(e, recs){
+            Mails.find({limit:100}, function(e, recs){
+
                 if(!e){
+
                     cb(recs);
+
                 }else{
+                    
                     console.error(e);
                 }
 
@@ -46,12 +50,13 @@ module.exports = function(_db, messanger){
                             run();
                         });
                         
-                    } else{
+                    } 
+                    // else{
                         
-                        Mails.update({id:r.id, sent:'1'}, function(){
-                            run();
-                        });
-                    }
+                    //     Mails.update({id:r.id, sent:'1'}, function(){
+                    //         run();
+                    //     });
+                    // }
 
                 });
 
