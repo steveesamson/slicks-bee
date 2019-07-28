@@ -9,7 +9,7 @@ module.exports = function(_db, messanger){
         Mails = Models.Mails(_req),
         fetchMails = cb => {
 
-            Mails.find({limit:100}, function(e, recs){
+            Mails.find({limit:100,sent:'0'}, function(e, recs){
                 if(!e){
                     cb(recs);
                 }else{
@@ -24,14 +24,7 @@ module.exports = function(_db, messanger){
         },
         dispatch = recs => {
 
-            let sendMail = r => {
-                r.to = `${r.receiver_name} <${r.receiver_email}>`;
-                r.message = r.body;
-                messanger.sendMail(r, function (e, info) {
-                    if (!e) {
-                        Mails.destroy({id:r.id});
-                    } 
-                });
+            let run = function(){
 
                 if(recs.length){
 
@@ -39,14 +32,31 @@ module.exports = function(_db, messanger){
 
                 }else setTimeout(start,100);
 
-                
+            },
+            sendMail = r => {
+
+                r.to = `${r.receiver_name} <${r.receiver_email}>`;
+                r.message = r.body;
+
+                messanger.sendMail(r, function (e, info) {
+
+                    if (!e) {
+
+                        Mails.destroy({id:r.id}, function(err, res){
+                            run();
+                        });
+                        
+                    } else{
+                        
+                        Mails.update({id:r.id, sent:'1'}, function(){
+                            run();
+                        });
+                    }
+
+                });
+
             };
-
-            if(recs.length){
-
-                sendMail(recs.pop());
-
-            }else setTimeout(start,100);
+            run();
         }; 
        
 
