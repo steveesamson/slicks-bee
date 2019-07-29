@@ -1,6 +1,6 @@
 {
   "name": "slicks-bee",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "description": "Slicks Back-End-Engine, slicks-bee, is a robust and high traffic NodeJS web framework developped on Expressjs 4+.",
   "main": "index.js",
   "scripts": {
