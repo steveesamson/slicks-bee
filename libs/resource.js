@@ -11,7 +11,6 @@ var fs = require('fs'),
     bcrypt = require('bcryptjs'),
     policies_path = null;
 
-
 module.exports = function (base) {
 
     String.prototype.startsWith = function (prefix) {
@@ -62,6 +61,7 @@ module.exports = function (base) {
 
     // console.log('Security: ', security)
     global['security'] = require(path.join(base, 'config', 'security'));
+    security = {...security, ...ENV};
 
     var controllers = {},
         appResources = [],
