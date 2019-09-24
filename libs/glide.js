@@ -3,6 +3,7 @@
  */
 const express = require('express'),
     errorHandler = require('errorhandler'),
+    path = require('path'),
     helmet = require('helmet'),
     compression = require('compression'),
     cookieParser = require('cookie-parser'),
@@ -25,7 +26,7 @@ module.exports = function (resource, sapper) {
         resource.slickRouter,
         errorHandler(),
         compression({ threshold: 0 }),
-        express.static(sapper? PUBLIC_DIR.replace(BASE_DIR+"/", "") : PUBLIC_DIR)
+        express.static(sapper? path.basename(PUBLIC_DIR) : PUBLIC_DIR)
     ); 
 
 

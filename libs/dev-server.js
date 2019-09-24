@@ -4,6 +4,7 @@
 let express = require('express'),
     compression = require('compression'),
     errorHandler = require('errorhandler'),
+    path = require('path'),
     helmet = require('helmet'),
     cookieParser = require('cookie-parser'),
     iocookieParser = require('socket.io-cookie');
@@ -28,9 +29,7 @@ module.exports = function (base, sapper, cb) {
     const app = express(),
           router = express.Router();
 
-    // console.log("FULL: ", FULL_PUBLIC_DIR, 'SHORT: ', PUBLIC_DIR)
     // dbUtils.loadDbs(dbKeys, startServer);
-    // console.log(MOUNT_PATH)
     dbUtils.load(cfg, dbUtils.handler, startServer);
 
 
@@ -64,7 +63,7 @@ module.exports = function (base, sapper, cb) {
             resource.slickRouter,
             errorHandler(),
             compression({ threshold: 0 }),
-            express.static(sapper? PUBLIC_DIR.replace(BASE_DIR+"/", "") : PUBLIC_DIR)
+            express.static(sapper? path.basename(PUBLIC_DIR) : PUBLIC_DIR)
         ); // set the static files location /public/img will be /img for users
 
         var server = require('http').Server(app),
