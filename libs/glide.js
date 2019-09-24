@@ -1,26 +1,34 @@
 /**
  * Created by steve Samson <stevee.samson@gmail.com> on 2/6/14.
  */
-var express = require('express'),
+const express = require('express'),
     errorHandler = require('errorhandler'),
     helmet = require('helmet'),
+    compression = require('compression'),
     cookieParser = require('cookie-parser'),
     iocookieParser = require('socket.io-cookie');
     methodOverride = require('method-override');
 //stud = require('stud');
 
-module.exports = function (resource) {
-    var app = express();
+module.exports = function (resource, sapper) {
+    const app = express(),
+    router = express.Router();
 
 
     // app.set('port', resource.config.application.port);
-    app.use(helmet());
-    app.use(cookieParser());
-    app.use(resource.slicksMultiparts());
-    app.use(methodOverride());                  // simulate DELETE and PUT
-    app.use(resource.slickRouter);
-    app.use(errorHandler());
-    app.use(express.static(PUBLIC_DIR));     // set the static files location /public/img will be /img for users
+
+    app.use(
+        helmet(),
+        cookieParser(),
+        resource.slicksMultiparts(),
+        methodOverride(),
+        resource.slickRouter,
+        errorHandler(),
+        compression({ threshold: 0 }),
+        express.static(sapper? PUBLIC_DIR.replace(BASE_DIR+"/", "") : PUBLIC_DIR)
+    ); 
+
+
 
     var server = require('http').Server(app),
         io = require('socket.io')(server);
@@ -31,7 +39,16 @@ module.exports = function (resource) {
     global.IO = io;
 
 
-    require('./strap')(app, resource);
+    // require('./strap')(app, resource);
+
+    require('./route')(app, resource, router);
+    
+    app.use(MOUNT_PATH,router);
+
+    sapper && app.use(
+        sapper.middleware()
+    );
+    
 
     app.server.listen(0, 'localhost');
 

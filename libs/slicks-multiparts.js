@@ -14,6 +14,10 @@ module.exports = function (options) {
 
         var files = {},
             body = {},
+            
+            contentType = req.headers['content-type'],
+            isUpload = !!contentType &&  ((contentType.indexOf('multipart/form-data') !== -1) || (contentType.indexOf('application/x-www-form-urlencoded') !== -1)),
+            isJson = !!contentType &&   (contentType.indexOf('application/json') !== -1),
             decodeChunks = function (cb) {
 
                 let chunk = '';
@@ -30,10 +34,7 @@ module.exports = function (options) {
                    req.body = chunk;
                    next();
                 });
-            },
-            contentType = req.headers['content-type'],
-            isUpload = !!contentType &&  ((contentType.indexOf('multipart/form-data') !== -1) || (contentType.indexOf('application/x-www-form-urlencoded') !== -1)),
-            isJson = !!contentType &&   (contentType.indexOf('application/json') !== -1);
+            };
 
         if (!isUpload) {
             

@@ -138,12 +138,12 @@ module.exports = function (resource) {
 			}
 
 			//add default route and the handler
-			if (!controllers['Index']) {
-				controllers['Index'] = indexController(resource.config.views.index_file);
-				routes['Index'] = {
-					'get /': 'index'
-				};
-			}
+			// if (!controllers['Index']) {
+			// 	controllers['Index'] = indexController(resource.config.views.index_file);
+			// 	routes['Index'] = {
+			// 		'get /': 'index'
+			// 	};
+			// }
 			resource['routes'] = routes;
 		},
 		configurePolicy: function () {

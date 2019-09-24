@@ -9,7 +9,7 @@ module.exports = function(viewPath){
 
     return {
         index: function (req, res) {
-            res.render(viewPath, {year: DateTime('yyyy'), script:'/js/a_.js?v=' + global.assetVar, style:'/css/a_.css?v=' + global.assetVar});
+           res.render(viewPath, {year: DateTime('yyyy'), script:'/js/a_.js?v=' + global.assetVar, style:'/css/a_.css?v=' + global.assetVar});
         }
     };
 };

@@ -2,16 +2,14 @@
  * Created by steve Samson <stevee.samson@gmail.com> on 2/6/14.
  */
 let express = require('express'),
+    compression = require('compression'),
     errorHandler = require('errorhandler'),
     helmet = require('helmet'),
     cookieParser = require('cookie-parser'),
     iocookieParser = require('socket.io-cookie');
 methodOverride = require('method-override');
 
-
-
-
-module.exports = function (base, cb) {
+module.exports = function (base, sapper, cb) {
     
     
     let resource = require('./resource')(base),
@@ -27,10 +25,12 @@ module.exports = function (base, cb) {
     config.configureController();
     config.configureRoute();
     config.configurePolicy();
-    let app = express();
+    const app = express(),
+          router = express.Router();
 
-    
+    // console.log("FULL: ", FULL_PUBLIC_DIR, 'SHORT: ', PUBLIC_DIR)
     // dbUtils.loadDbs(dbKeys, startServer);
+    // console.log(MOUNT_PATH)
     dbUtils.load(cfg, dbUtils.handler, startServer);
 
 
@@ -54,19 +54,18 @@ module.exports = function (base, cb) {
 
             });
             cronMaster.init(resource.crons);
-
-
-
         };
 
-        // app.set('port', resource.config.application.port);
-        app.use(helmet());
-        app.use(cookieParser());
-        app.use(resource.slicksMultiparts());
-        app.use(methodOverride()); // simulate DELETE and PUT
-        app.use(resource.slickRouter);
-        app.use(errorHandler());
-        app.use(express.static(PUBLIC_DIR)); // set the static files location /public/img will be /img for users
+        app.use(
+            helmet(),
+            cookieParser(),
+            resource.slicksMultiparts(),
+            methodOverride(),
+            resource.slickRouter,
+            errorHandler(),
+            compression({ threshold: 0 }),
+            express.static(sapper? PUBLIC_DIR.replace(BASE_DIR+"/", "") : PUBLIC_DIR)
+        ); // set the static files location /public/img will be /img for users
 
         var server = require('http').Server(app),
             io = require('socket.io')(server);
@@ -76,8 +75,15 @@ module.exports = function (base, cb) {
         app.io = io;
         global.IO = io;
 
+        sapper && app.use(
+            sapper.middleware()
+        );
+        // require('./strap')(app, resource);
+        require('./route')(app, resource, router);
+        //This allow us customize the api path
+        app.use(MOUNT_PATH,router);
 
-        require('./strap')(app, resource);
+
 
         app.server.listen(APP_PORT, () => {
             startWatches();

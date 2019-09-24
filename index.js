@@ -3,14 +3,14 @@
  */
 
 const environ = require('./libs/environ');
-module.exports = function (base, devel) {
+module.exports = function (base, sapper, devel) {
 
     environ(base, function beforeAll(){
 
         if (devel) {
-            return require('./libs/dev-server')(base, devel);
+            return require('./libs/dev-server')(base, sapper, devel);
         } else {
-            require('./libs/server')(base);
+            require('./libs/server')(base, sapper);
         }
     });
    

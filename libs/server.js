@@ -1,7 +1,7 @@
 /**
  * Created by steve samson <stevee.samson@gmail.com> on 2/4/14.
  */
-module.exports = function (base) {
+module.exports = function (base, sapper) {
 
 
     let net = require('net'),
@@ -122,7 +122,7 @@ module.exports = function (base) {
 
         } else {
             // Note we don't use a port here because the master listens on it for us.
-            var app = require('./glide')(resource);
+            var app = require('./glide')(resource, sapper);
 
             //var server = app.server.listen(0,'localhost');
             // Here you might use middleware, attach routes, etc.

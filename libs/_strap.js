@@ -13,6 +13,8 @@ var fs = require('fs'),
 
         return result.length === 1 ? "" : '.' + result.pop();
     };
+    const express = require('express'),
+    router = express.Router();
 
 module.exports = function (app, resource) {
 
@@ -107,9 +109,9 @@ module.exports = function (app, resource) {
     if(resource.config.application.spa_strict){
 
         console.log('SPA MODE on');
-        app.get('*', function(req, res) {  
-            res.sendFile(fspath.join(PUBLIC_DIR + '/index.html'));
-        });
+        // app.get('*', function(req, res) {  
+        //     res.sendFile(fspath.join(PUBLIC_DIR + '/index.html'));
+        // });
     }else{
         console.log('SSR MODE on');
     }

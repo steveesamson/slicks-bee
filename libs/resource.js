@@ -117,8 +117,8 @@ module.exports = function (base) {
     });
 
     global['utils'] = _;
-    global.PUBLIC_DIR = base + views_config.static_dir;
-    global.VIEW_DIR = base + views_config.view_dir;
+    global.PUBLIC_DIR = path.join(base, views_config.static_dir);
+    global.VIEW_DIR = path.join(base, views_config.view_dir);
     var normalizePolicies = function () {
         var normalized = {};
         for (var k in policies_config) {
@@ -160,6 +160,7 @@ module.exports = function (base) {
     global.appResources = appResources;
     global.isMultitenant = (app_config.multitenant === true);
     global.APP_PORT = app_config.port;
+    global.MOUNT_PATH = app_config.mount_path || "";
     return {
         models: models,
         controllers: controllers,
